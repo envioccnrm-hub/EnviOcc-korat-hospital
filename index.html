@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบติดตามการปรับปรุงแก้ไขหลังการประเมินมาตรฐานโรงพยาบาล สสจ.นครราชสีมา</title>
+  <title>ระบบติดตามการปรับปรุงแก้ไขหลังการประเมินมาตรฐานโรงพยาบาล สำนักงานสาธารณสุขจังหวัดนครราชสีมา</title>
   
   <!-- CSS Frameworks -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,6 +12,7 @@
   <style>
     body { font-family: 'Sarabun', sans-serif; background-color: #f4f6f9; }
     .bg-korat { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+    .bg-green-gradient { background: linear-gradient(135deg, #134e5e 0%, #71b280 100%); }
     .card-stat { border: none; border-radius: 12px; transition: transform 0.2s; }
     .card-stat:hover { transform: translateY(-3px); }
     .badge-status { font-size: 0.85rem; padding: 6px 12px; border-radius: 20px; }
@@ -19,15 +20,17 @@
 </head>
 <body>
 
-  <!-- Full-Screen Login Section (แสดงขึ้นมาทันทีเมื่อเปิดเว็บ) -->
-  <div id="loginSection" class="min-vh-100 d-flex align-items-center justify-content-center bg-korat py-5 px-3">
-    <div class="card shadow-lg border-0 rounded-4 p-4 p-md-5" style="max-width: 480px; width: 100%;">
+  <!-- Full-Screen Login Section (พื้นหลังสีเขียว-เขียวอ่อน) -->
+  <div id="loginSection" class="min-vh-100 d-flex align-items-center justify-content-center bg-green-gradient py-5 px-3">
+    <div class="card shadow-lg border-0 rounded-4 p-4 p-md-5" style="max-width: 500px; width: 100%;">
       <div class="text-center mb-4">
-        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm mb-3" style="width: 80px; height: 80px;">
-          <i class="fa-solid fa-hospital-user fa-2x"></i>
+        <!-- ส่วนรูปภาพโลโก้/ไอคอนหน้า Login (สามารถเปลี่ยนลิงก์รูปภาพใน src ได้ตามต้องการ) -->
+        <div class="mb-3">
+          <img src=" https://chatgpt.com/s/m_6a70cf3140b48191905acbfa4c6a2d12" alt="Logo" class="rounded-circle shadow-sm bg-light p-2" style="width: 80px; height: 80px; object-fit: contain;">
         </div>
-        <h4 class="fw-bold text-dark mb-1">ระบบติดตามการปรับปรุงแก้ไข</h4>
-        <p class="text-muted small mb-0">หลังการประเมินมาตรฐานโรงพยาบาล สสจ.นครราชสีมา</p>
+        <h5 class="fw-bold text-dark mb-1">ระบบติดตามการปรับปรุงแก้ไข</h5>
+        <h5 class="fw-bold text-dark mb-2">หลังการประเมินมาตรฐานโรงพยาบาล</h5>
+        <div class="text-success fw-bold" style="font-size: 0.9rem;">สำนักงานสาธารณสุขจังหวัดนครราชสีมา</div>
       </div>
       <form onsubmit="handleLogin(event)">
         <div class="mb-3">
@@ -44,14 +47,15 @@
           <label class="form-label fw-bold text-secondary small">ชื่อผู้เข้าใช้งาน</label>
           <input type="text" id="loginSenderName" class="form-control form-control-lg fs-6" placeholder="กรอกชื่อ-นามสกุลผู้ใช้งาน" required>
         </div>
-        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-2 shadow-sm">
+        <!-- ปุ่มเข้าสู่ระบบ สีฟ้า -->
+        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-2 shadow-sm" style="background-color: #0d6efd; border-color: #0d6efd;">
           <i class="fa-solid fa-right-to-bracket me-2"></i>เข้าสู่ระบบ
         </button>
       </form>
     </div>
   </div>
 
-  <!-- Main System Content (ซ่อนไว้จนกว่าจะ Login สำเร็จ) -->
+  <!-- Main System Content (โครงสร้างระบบภายในคงเดิม 100%) -->
   <div id="systemContent" class="d-none">
     <!-- Navbar Header -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-korat shadow-sm sticky-top">
@@ -263,19 +267,16 @@
     let allSubmissions = [];
     let hospitalList = [];
     
-    // Modals
     let submitModal, reviewModal;
 
     document.addEventListener("DOMContentLoaded", () => {
       submitModal = new bootstrap.Modal(document.getElementById('submitModal'));
       reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
       
-      // โหลดรายชื่อ รพ. (หน้า Login จะแสดงขึ้นมาทันทีโดยอัตโนมัติเนื่องจากยังไม่ได้ Login)
       loadHospitalList();
       loadAllData();
     });
 
-    // 1. ดึงรายชื่อ รพ. สำหรับ Dropdown Login
     async function loadHospitalList() {
       try {
         const res = await fetch(`${GAS_WEB_APP_URL}?action=getHospitals`);
@@ -294,7 +295,6 @@
       }
     }
 
-    // 2. ดึงรายการข้อมูลทั้งหมด
     async function loadAllData() {
       try {
         const res = await fetch(`${GAS_WEB_APP_URL}?action=getAllData`);
@@ -308,7 +308,6 @@
       }
     }
 
-    // Update Cards (Dashboard)
     function updateDashboard(data) {
       document.getElementById("statTotal").innerText = data.length;
       document.getElementById("statPending").innerText = data.filter(s => s.status === "รอตรวจสอบ").length;
@@ -316,14 +315,12 @@
       document.getElementById("statRevision").innerText = data.filter(s => s.status === "ต้องแก้ไขเพิ่มเติม").length;
     }
 
-    // Filter Data & Role-based separation
     function filterData() {
       const std = document.getElementById("filterStandard").value;
       const search = document.getElementById("filterSearch").value.toLowerCase();
       
       let baseData = allSubmissions;
       
-      // แยกการแสดงผลตาม Role (Hospital เห็นเฉพาะของตัวเอง)
       if (currentUser && currentUser.role === "Hospital") {
         baseData = allSubmissions.filter(item => 
           item.hospitalCode === currentUser.code || 
@@ -341,7 +338,6 @@
       renderTable(filtered);
     }
 
-    // Render Table
     function renderTable(data) {
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
@@ -386,7 +382,6 @@
       });
     }
 
-    // Login Action
     async function handleLogin(e) {
       e.preventDefault();
       const code = document.getElementById("loginHospitalSelect").value;
@@ -411,7 +406,7 @@
         const result = await res.json();
         if (result.status === "success") {
           currentUser = result.user;
-          currentUser.senderName = senderName; // บันทึกชื่อผู้ส่งงานที่กรอกมา
+          currentUser.senderName = senderName;
           updateUserUI();
           Swal.fire({ icon: 'success', title: 'เข้าสู่ระบบสำเร็จ', text: `ยินดีต้อนรับ ${currentUser.name}`, timer: 1500, showConfirmButton: false });
         } else {
@@ -424,7 +419,6 @@
 
     function logout() {
       currentUser = null;
-      // เคลียร์ค่าช่อง Login
       document.getElementById("loginPasscode").value = "";
       document.getElementById("loginSenderName").value = "";
       document.getElementById("loginHospitalSelect").value = "";
@@ -446,10 +440,8 @@
         navbarUserArea.classList.remove("d-none");
         userInfo.innerText = `👤 ${currentUser.name} (${currentUser.role}) | ผู้ส่ง: ${currentUser.senderName}`;
         
-        // เปิดปุ่มส่งงานเฉพาะ Role Hospital เท่านั้น
         btnNewSubmit.disabled = (currentUser.role !== "Hospital");
 
-        // นำชื่อผู้เข้าใช้งานไปใส่ในช่องผู้ส่งงานอัตโนมัติ
         if (formSender) {
           formSender.value = currentUser.senderName;
         }
@@ -462,7 +454,6 @@
       filterData();
     }
 
-    // Submit Action
     function openSubmitModal() { 
       if (currentUser && currentUser.senderName) {
         document.getElementById("formSenderName").value = currentUser.senderName;
@@ -499,7 +490,7 @@
           Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: result.message });
           const sender = document.getElementById("formSenderName").value;
           document.getElementById("formSubmit").reset();
-          document.getElementById("formSenderName").value = sender; // คงชื่อผู้ส่งไว้
+          document.getElementById("formSenderName").value = sender;
           submitModal.hide();
           loadAllData();
         } else {
@@ -512,7 +503,6 @@
       }
     }
 
-    // Review Action (Admin)
     function openReviewModal(rowIndex, standardType, status, grade, notes) {
       document.getElementById("reviewRowIndex").value = rowIndex;
       document.getElementById("reviewStandardType").value = standardType;
