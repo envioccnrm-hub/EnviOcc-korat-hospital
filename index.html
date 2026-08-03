@@ -9,7 +9,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
   <style>
     body { font-family: 'Sarabun', sans-serif; background-color: #f4f6f9; }
     .bg-korat { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
@@ -19,7 +18,6 @@
   </style>
 </head>
 <body>
-
   <!-- Navbar Header -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-korat shadow-sm sticky-top">
     <div class="container">
@@ -38,8 +36,8 @@
     </div>
   </nav>
 
-  <div class="container py-4">
-
+  <!-- Main System Content (ซ่อนไว้ก่อนจนกว่าจะ Login สำเร็จ) -->
+  <div id="systemContent" class="container py-4 d-none">
     <!-- สรุปสถานะ (Dashboard Cards) -->
     <div class="row g-3 mb-4">
       <div class="col-12 col-sm-6 col-md-3">
@@ -67,7 +65,6 @@
         </div>
       </div>
     </div>
-
     <!-- ปุ่มส่งงาน & ตัวกรอง -->
     <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
       <div class="row g-3 align-items-center">
@@ -92,7 +89,6 @@
         </div>
       </div>
     </div>
-
     <!-- ตารางแสดงรายการข้อมูล -->
     <div class="card border-0 shadow-sm rounded-4 p-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
@@ -101,7 +97,6 @@
           <i class="fa-solid fa-rotate me-1"></i> โหลดข้อมูลใหม่
         </button>
       </div>
-
       <div class="table-responsive">
         <table class="table table-hover align-middle">
           <thead class="table-light">
@@ -124,16 +119,14 @@
         </table>
       </div>
     </div>
-
   </div>
 
   <!-- Modal 1: Login -->
-  <div class="modal fade" id="loginModal" tabindex="-1">
+  <div class="modal fade" id="loginModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content rounded-4 border-0 shadow">
         <div class="modal-header bg-korat text-white">
           <h5 class="modal-title fw-bold"><i class="fa-solid fa-lock me-2"></i>เข้าสู่ระบบ</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-4">
           <form onsubmit="handleLogin(event)">
@@ -257,24 +250,24 @@
   <!-- JS Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
   <script>
-    // ⚠️ นำ Web App URL ที่ได้จากการ Deploy ใน Google Apps Script มาวางตรงนี้
+    // ⚠️ Web App URL ของคุณ
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzx_ctZACHFf07JgedtQTMYQ_IF3KIKaC9npjZPd_D10_lzAB6cbTuwCNRhuQOZdFX-/exec";
-
     let currentUser = null;
     let allSubmissions = [];
     let hospitalList = [];
-
     // Modals
     let loginModal, submitModal, reviewModal;
 
     document.addEventListener("DOMContentLoaded", () => {
-      loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+      loginModal = new bootstrap.Modal(document.getElementById('loginModal'), { backdrop: 'static', keyboard: false });
       submitModal = new bootstrap.Modal(document.getElementById('submitModal'));
       reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
-
-      loadHospitalList();
+      
+      // โหลดรายชื่อ รพ. แล้วบังคับเปิดหน้า Login ทันที
+      loadHospitalList().then(() => {
+        loginModal.show();
+      });
       loadAllData();
     });
 
@@ -290,7 +283,6 @@
           hospitalList.forEach(h => {
             select.innerHTML += `<option value="${h.code}">${h.name} (${h.district})</option>`;
           });
-          // เพิ่มตัวเลือก ADMIN สสจ.
           select.innerHTML += `<option value="ADMIN">*** เจ้าหน้าที่ สสจ.นครราชสีมา (Admin) ***</option>`;
         }
       } catch (err) {
@@ -300,38 +292,42 @@
 
     // 2. ดึงรายการข้อมูลทั้งหมด
     async function loadAllData() {
-      const tbody = document.getElementById("tableBody");
-      tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังดึงข้อมูลล่าสุดจาก Google Sheets...</td></tr>`;
-
       try {
         const res = await fetch(`${GAS_WEB_APP_URL}?action=getAllData`);
         const result = await res.json();
         if (result.status === "success") {
           allSubmissions = result.data;
-          updateDashboard();
           filterData();
-        } else {
-          tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">เกิดข้อผิดพลาด: ${result.message}</td></tr>`;
         }
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">ไม่สามารถเชื่อมต่อฐานข้อมูลได้</td></tr>`;
+        console.error("Error loading data:", err);
       }
     }
 
-    // Update Cards
-    function updateDashboard() {
-      document.getElementById("statTotal").innerText = allSubmissions.length;
-      document.getElementById("statPending").innerText = allSubmissions.filter(s => s.status === "รอตรวจสอบ").length;
-      document.getElementById("statApproved").innerText = allSubmissions.filter(s => s.status === "ตรวจสอบเรียบร้อยแล้ว").length;
-      document.getElementById("statRevision").innerText = allSubmissions.filter(s => s.status === "ต้องแก้ไขเพิ่มเติม").length;
+    // Update Cards (Dashboard)
+    function updateDashboard(data) {
+      document.getElementById("statTotal").innerText = data.length;
+      document.getElementById("statPending").innerText = data.filter(s => s.status === "รอตรวจสอบ").length;
+      document.getElementById("statApproved").innerText = data.filter(s => s.status === "ตรวจสอบเรียบร้อยแล้ว").length;
+      document.getElementById("statRevision").innerText = data.filter(s => s.status === "ต้องแก้ไขเพิ่มเติม").length;
     }
 
-    // Filter Data
+    // Filter Data & Role-based separation
     function filterData() {
       const std = document.getElementById("filterStandard").value;
       const search = document.getElementById("filterSearch").value.toLowerCase();
+      
+      let baseData = allSubmissions;
+      
+      // แยกการแสดงผลตาม Role (Hospital เห็นเฉพาะของตัวเอง)
+      if (currentUser && currentUser.role === "Hospital") {
+        baseData = allSubmissions.filter(item => 
+          item.hospitalCode === currentUser.code || 
+          item.hospitalName === currentUser.name
+        );
+      }
 
-      let filtered = allSubmissions.filter(item => {
+      let filtered = baseData.filter(item => {
         const matchStd = (std === "ALL") || (item.standardType === std);
         const matchSearch = item.hospitalName.toLowerCase().includes(search) || 
                             item.category.toLowerCase().includes(search) || 
@@ -339,6 +335,7 @@
         return matchStd && matchSearch;
       });
 
+      updateDashboard(baseData);
       renderTable(filtered);
     }
 
@@ -346,24 +343,19 @@
     function renderTable(data) {
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
-
       if (data.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">ไม่พบรายการข้อมูล</td></tr>`;
         return;
       }
-
       data.forEach(item => {
         let badgeClass = "bg-secondary";
         if (item.status === "รอตรวจสอบ") badgeClass = "bg-warning text-dark";
         if (item.status === "ตรวจสอบเรียบร้อยแล้ว") badgeClass = "bg-success";
         if (item.status === "ต้องแก้ไขเพิ่มเติม") badgeClass = "bg-danger";
-
         const stdBadge = item.standardType === "Green" 
           ? `<span class="badge bg-success">Green & Clean</span>`
           : `<span class="badge bg-primary">อาชีวอนามัยฯ</span>`;
-
         const canReview = currentUser && currentUser.role === "Admin";
-
         tbody.innerHTML += `
           <tr>
             <td class="small text-muted">${item.timestamp}</td>
@@ -399,7 +391,6 @@
       e.preventDefault();
       const code = document.getElementById("loginHospitalSelect").value;
       const passcode = document.getElementById("loginPasscode").value;
-
       try {
         const res = await fetch(GAS_WEB_APP_URL, {
           method: "POST",
@@ -407,7 +398,6 @@
           body: JSON.stringify({ action: "login", hospitalCode: code, passcode: passcode })
         });
         const result = await res.json();
-
         if (result.status === "success") {
           currentUser = result.user;
           updateUserUI();
@@ -430,6 +420,7 @@
     function logout() {
       currentUser = null;
       updateUserUI();
+      loginModal.show(); // แสดงหน้า Login กลับขึ้นมาทันทีเมื่อออกจากระบบ
       Swal.fire({ icon: 'info', title: 'ออกจากระบบแล้ว', timer: 1200, showConfirmButton: false });
     }
 
@@ -438,29 +429,32 @@
       const btnLogin = document.getElementById("btnLogin");
       const btnLogout = document.getElementById("btnLogout");
       const btnNewSubmit = document.getElementById("btnNewSubmit");
+      const systemContent = document.getElementById("systemContent");
 
       if (currentUser) {
         userInfo.innerText = `👤 ${currentUser.name} (${currentUser.role})`;
         btnLogin.classList.add("d-none");
         btnLogout.classList.remove("d-none");
-        btnNewSubmit.disabled = (currentUser.role === "Guest");
+        systemContent.classList.remove("d-none"); // แสดงระบบหลัง Login
+        
+        // เปิดปุ่มส่งงานเฉพาะ Role Hospital เท่านั้น
+        btnNewSubmit.disabled = (currentUser.role !== "Hospital");
       } else {
         userInfo.innerText = "";
         btnLogin.classList.remove("d-none");
         btnLogout.classList.add("d-none");
-        btnNewSubmit.disabled = true;
+        systemContent.classList.add("d-none"); // ซ่อนระบบเมื่อยังไม่ Login
       }
       filterData();
     }
 
     // Submit Action
     function openSubmitModal() { submitModal.show(); }
-
+    
     async function handleSaveSubmission(e) {
       e.preventDefault();
       const btn = document.getElementById("btnSaveSubmit");
       btn.disabled = true;
-
       const payload = {
         action: "saveSubmission",
         hospitalCode: currentUser.code,
@@ -475,7 +469,6 @@
         details: document.getElementById("formDetails").value,
         evidenceUrl: document.getElementById("formEvidenceUrl").value
       };
-
       try {
         const res = await fetch(GAS_WEB_APP_URL, {
           method: "POST",
@@ -483,7 +476,6 @@
           body: JSON.stringify(payload)
         });
         const result = await res.json();
-
         if (result.status === "success") {
           Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: result.message });
           document.getElementById("formSubmit").reset();
@@ -519,7 +511,6 @@
         grade: document.getElementById("reviewGrade").value,
         notes: document.getElementById("reviewNotes").value
       };
-
       try {
         const res = await fetch(GAS_WEB_APP_URL, {
           method: "POST",
@@ -527,7 +518,6 @@
           body: JSON.stringify(payload)
         });
         const result = await res.json();
-
         if (result.status === "success") {
           Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: result.message, timer: 1500, showConfirmButton: false });
           reviewModal.hide();
