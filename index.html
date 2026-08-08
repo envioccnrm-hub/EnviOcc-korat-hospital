@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="h-full bg-slate-50">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,47 +10,129 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- SweetAlert2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Google Fonts: Prompt & Sarabun -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            prompt: ['Prompt', 'sans-serif'],
+            sarabun: ['Sarabun', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+              950: '#052e16',
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
     body {
       font-family: 'Sarabun', sans-serif;
-      background-color: #f8fafc;
+    }
+    h1, h2, h3, h4, h5, h6, .font-heading {
+      font-family: 'Prompt', sans-serif;
     }
     .spinner-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
       display: flex; justify-content: center; align-items: center;
       z-index: 9999;
     }
+    .login-bg {
+      background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #0f766e 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .login-bg::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, rgba(255,255,255,0) 70%);
+      top: -150px;
+      right: -150px;
+      pointer-events: none;
+    }
+    .login-bg::after {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(255,255,255,0) 70%);
+      bottom: -100px;
+      left: -100px;
+      pointer-events: none;
+    }
+    select[multiple] {
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 #f1f5f9;
+    }
+    select[multiple]::-webkit-scrollbar {
+      width: 6px;
+    }
+    select[multiple]::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    select[multiple]::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 4px;
+    }
   </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col bg-slate-50">
 
   <!-- Spinner Loading -->
   <div id="loadingSpinner" class="spinner-overlay hidden">
-    <div class="bg-white p-5 rounded-2xl shadow-xl flex items-center space-x-4">
-      <div class="animate-spin rounded-full h-8 w-8 border-4 border-emerald-500 border-t-transparent"></div>
-      <span class="text-slate-700 font-medium">กำลังดำเนินการ...</span>
+    <div class="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center space-y-3 min-w-[200px] border border-slate-100 animate-fade-in">
+      <div class="relative flex items-center justify-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
+        <i class="fa-solid fa-hospital text-emerald-600 absolute text-sm"></i>
+      </div>
+      <span class="text-slate-700 font-medium text-sm font-heading">กำลังดำเนินการ...</span>
     </div>
   </div>
 
   <!-- Navbar -->
-  <nav class="bg-emerald-700 text-white shadow-md sticky top-0 z-40">
+  <nav class="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 text-white shadow-lg sticky top-0 z-40 border-b border-emerald-700/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16 items-center">
         <div class="flex items-center space-x-3">
-          <i class="fa-solid font-bold text-2xl text-emerald-200 fa-hospital-user"></i>
-          <span class="font-bold text-lg sm:text-xl tracking-tight">ระบบติดตามงานมาตรฐานโรงพยาบาล</span>
-        </div>
-        <div id="userInfoSection" class="hidden flex items-center space-x-4">
-          <div class="text-right hidden sm:block">
-            <p id="navUserName" class="text-sm font-semibold leading-none"></p>
-            <p id="navUserRole" class="text-xs text-emerald-200 mt-1"></p>
+          <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-inner">
+            <i class="fa-solid fa-hospital-user text-xl text-emerald-300"></i>
           </div>
-          <button onclick="logout()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-2 rounded-lg transition flex items-center space-x-1">
+          <div>
+            <span class="font-heading font-bold text-lg sm:text-xl tracking-tight block leading-tight">ระบบติดตามงานมาตรฐานโรงพยาบาล</span>
+            <span class="text-[10px] text-emerald-200/80 font-light hidden sm:block">Green & Clean Hospital / อาชีวอนามัยและเวชกรรมสิ่งแวดล้อม</span>
+          </div>
+        </div>
+        <div id="userInfoSection" class="hidden flex items-center space-x-3 sm:space-x-4">
+          <div class="text-right hidden sm:block border-r border-emerald-700/60 pr-4">
+            <p id="navUserName" class="text-xs sm:text-sm font-semibold leading-none text-white font-heading"></p>
+            <p id="navUserRole" class="text-[11px] text-emerald-300 mt-1 font-medium"></p>
+          </div>
+          <button onclick="logout()" class="bg-emerald-950/60 hover:bg-rose-600/90 text-emerald-100 hover:text-white text-xs px-3.5 py-2 rounded-xl transition duration-200 flex items-center space-x-1.5 border border-emerald-700/50 hover:border-rose-500 shadow-sm">
             <i class="fa-solid fa-right-from-bracket"></i>
-            <span>ออกจากระบบ</span>
+            <span class="font-medium">ออกจากระบบ</span>
           </button>
         </div>
       </div>
@@ -58,194 +140,328 @@
   </nav>
 
   <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-grow w-full">
 
     <!-- VIEW 1: LOGIN -->
-    <div id="loginView" class="max-w-md mx-auto mt-10 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-      <div class="bg-emerald-600 p-6 text-center text-white">
-        <i class="fa-solid fa-shield-halved text-4xl mb-2 text-emerald-200"></i>
-        <h2 class="text-xl font-bold">เข้าสู่ระบบใช้งาน</h2>
-        <p class="text-xs text-emerald-100 mt-1">ป้อนรหัสโรงพยาบาลเพื่อเข้าสู่ระบบ</p>
+    <div id="loginView" class="min-h-[calc(100vh-12rem)] flex items-center justify-center py-6">
+      <div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-12 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+        
+        <!-- Branding Left Banner (Desktop) -->
+        <div class="md:col-span-5 login-bg p-8 sm:p-10 text-white flex flex-col justify-between relative">
+          <div class="relative z-10">
+            <div class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium text-emerald-200 mb-6 border border-white/20">
+              <i class="fa-solid fa-shield-heart"></i>
+              <span>ระบบประเมินมาตรฐาน</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold font-heading leading-tight mb-3 text-white">
+              ระบบติดตามงาน<br>การประเมินมาตรฐาน
+            </h1>
+            <p class="text-xs sm:text-sm text-emerald-100/90 leading-relaxed font-light">
+              ศูนย์รวมการส่งรายงานและติดตามผลการประเมิน Green & Clean Hospital และงานอาชีวอนามัยและเวชกรรมสิ่งแวดล้อม
+            </p>
+          </div>
+
+          <div class="relative z-10 mt-8 pt-6 border-t border-emerald-500/30">
+            <div class="flex items-center space-x-3 text-xs text-emerald-200">
+              <i class="fa-solid fa-circle-check text-emerald-400"></i>
+              <span>อัปโหลดหลักฐาน PDF ตรงเข้า Google Drive</span>
+            </div>
+            <div class="flex items-center space-x-3 text-xs text-emerald-200 mt-2">
+              <i class="fa-solid fa-circle-check text-emerald-400"></i>
+              <span>ติดตามสถานะและข้อเสนอแนะแบบ Real-time</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Login Form Right Side -->
+        <div class="md:col-span-7 p-8 sm:p-10 flex flex-col justify-center bg-white">
+          <div class="mb-6">
+            <h2 class="text-xl font-bold text-slate-800 font-heading">เข้าสู่ระบบใช้งาน</h2>
+            <p class="text-xs text-slate-500 mt-1">โปรดกรอกรหัสผู้ใช้งานและรหัสผ่านเพื่อเข้าสู่ระบบ</p>
+          </div>
+
+          <form onsubmit="handleLogin(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">รหัสผู้ใช้งาน / รหัสโรงพยาบาล</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                  <i class="fa-solid fa-hospital-user text-sm"></i>
+                </span>
+                <input type="text" id="loginUsername" placeholder="เช่น H10668 หรือ Admin" required class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm transition bg-slate-50/50 focus:bg-white">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">รหัสผ่าน</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                  <i class="fa-solid fa-lock text-sm"></i>
+                </span>
+                <input type="password" id="loginPassword" placeholder="••••••••" required class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm transition bg-slate-50/50 focus:bg-white">
+                <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600">
+                  <i id="passwordToggleIcon" class="fa-solid fa-eye text-xs"></i>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium py-3 rounded-xl shadow-lg shadow-emerald-600/20 transition duration-200 text-sm font-heading flex items-center justify-center space-x-2 group">
+              <span>เข้าสู่ระบบ</span>
+              <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+            </button>
+          </form>
+
+          <!-- Quick Preview Helper Banner for GitHub/Local preview -->
+          <div class="mt-6 p-3 bg-emerald-50/70 border border-emerald-200/60 rounded-xl text-[11px] text-emerald-800 flex items-start space-x-2">
+            <i class="fa-solid fa-circle-info text-emerald-600 mt-0.5 text-xs"></i>
+            <div>
+              <span class="font-semibold">ทดสอบพรีวิวบน GitHub Pages:</span>
+              <p class="text-emerald-700/90 mt-0.5">พิมพ์รหัสอะไรก็ได้เพื่อเข้าดูหน้าป้อนข้อมูลสำหรับโรงพยาบาล หรือพิมพ์ <code class="bg-emerald-100 px-1 rounded font-mono">admin</code> เพื่อดูหน้าต่างแอดมิน</p>
+            </div>
+          </div>
+
+        </div>
       </div>
-      <form onsubmit="handleLogin(event)" class="p-6 space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">รหัสผู้ใช้งาน / รหัสโรงพยาบาล</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-              <i class="fa-solid fa-user"></i>
-            </span>
-            <input type="text" id="loginUsername" required class="w-full pl-10 pr-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm">
-          </div>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">รหัสผ่าน</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-              <i class="fa-solid fa-lock"></i>
-            </span>
-            <input type="password" id="loginPassword" required class="w-full pl-10 pr-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm">
-          </div>
-        </div>
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg shadow-md transition duration-200 text-sm">
-          เข้าสู่ระบบ
-        </button>
-      </form>
     </div>
 
     <!-- VIEW 2: HOSPITAL DASHBOARD -->
     <div id="hospitalView" class="hidden space-y-6">
+      
+      <!-- Top Hospital Info Header Card -->
+      <div class="bg-gradient-to-r from-emerald-800 to-teal-800 rounded-2xl p-5 text-white shadow-md flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center space-x-3.5">
+          <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-emerald-200 text-2xl border border-white/20">
+            <i class="fa-solid fa-hospital"></i>
+          </div>
+          <div>
+            <h2 id="displayHspName" class="text-lg font-bold font-heading">โรงพยาบาล</h2>
+            <p id="displayHspSub" class="text-xs text-emerald-200/90 font-light mt-0.5"></p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2 bg-white/10 px-3 py-1.5 rounded-xl border border-white/20 text-xs">
+          <i class="fa-solid fa-check-circle text-emerald-300"></i>
+          <span>สถานะบัญชี: พร้อมส่งรายงาน</span>
+        </div>
+      </div>
+
       <!-- Tabs Switcher -->
-      <div class="flex border-b border-slate-200 space-x-4">
-        <button id="tabGreenBtn" onclick="switchWorkType('Green')" class="pb-3 px-4 text-sm font-bold border-b-2 border-emerald-600 text-emerald-600 transition">
-          <i class="fa-solid fa-leaf mr-2"></i>Green & Clean Hospital
+      <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap sm:flex-nowrap items-center gap-1">
+        <button id="tabGreenBtn" onclick="switchWorkType('Green')" class="flex-1 py-2.5 px-4 text-xs sm:text-sm font-semibold rounded-xl transition duration-200 flex items-center justify-center space-x-2 bg-emerald-600 text-white shadow-sm font-heading">
+          <i class="fa-solid fa-leaf text-emerald-200"></i>
+          <span>Green & Clean Hospital</span>
         </button>
-        <button id="tabOccBtn" onclick="switchWorkType('Occ')" class="pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition">
-          <i class="fa-solid fa-mask-ventilator mr-2"></i>อาชีวอนามัยและเวชกรรมสิ่งแวดล้อม
+        <button id="tabOccBtn" onclick="switchWorkType('Occ')" class="flex-1 py-2.5 px-4 text-xs sm:text-sm font-semibold rounded-xl transition duration-200 flex items-center justify-center space-x-2 text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-heading">
+          <i class="fa-solid fa-mask-ventilator text-teal-600"></i>
+          <span>อาชีวอนามัยและเวชกรรมสิ่งแวดล้อม</span>
         </button>
-        <button onclick="loadManuals()" class="pb-3 px-4 text-sm font-medium text-slate-500 hover:text-emerald-600 transition ml-auto">
-          <i class="fa-solid fa-book mr-1"></i>คู่มือใช้งาน
+        <button onclick="loadManuals()" class="py-2.5 px-4 text-xs font-medium text-slate-500 hover:text-emerald-700 hover:bg-slate-50 rounded-xl transition flex items-center space-x-1.5 whitespace-nowrap">
+          <i class="fa-solid fa-book-bookmark text-amber-500"></i>
+          <span>คู่มือใช้งาน</span>
         </button>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
         <!-- Form Section -->
-        <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <h3 class="text-base font-bold text-slate-800 mb-4 pb-2 border-b flex items-center">
-            <i class="fa-solid fa-paper-plane text-emerald-600 mr-2"></i>ส่งรายงานการประเมิน
-          </h3>
-          <form onsubmit="handleReportSubmit(event)" class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">ปีงบประมาณที่ประเมิน</label>
-              <select id="formEvalYear" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm bg-white">
-                <option value="2569">2569</option>
-                <option value="2568">2568</option>
-                <option value="2567">2567</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ส่งรายงาน</label>
-              <input type="text" id="formSenderName" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">เบอร์โทรศัพท์ติดต่อ</label>
-              <input type="tel" id="formSenderPhone" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">หมวดที่ต้องการแก้ไข/ส่งเพิ่ม</label>
-              <select id="formCategories" multiple onchange="onCategoryChange()" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm bg-white h-24">
-              </select>
-              <span class="text-xs text-slate-400">* กด Ctrl หรือ Cmd เพื่อเลือกหลายรายการ</span>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">ข้อ/ประเด็นที่แก้ไข</label>
-              <select id="formItems" multiple class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm bg-white h-28">
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">รายละเอียดเพิ่มเติม</label>
-              <textarea id="formDetails" rows="2" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"></textarea>
-            </div>
-            
-            <!-- Direct PDF Upload Input -->
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">แนบไฟล์หลักฐาน PDF <span class="text-red-500">* (ขนาดไม่เกิน 10MB)</span></label>
-              <input type="file" id="formPdfFile" accept="application/pdf" required class="w-full px-3 py-1.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm bg-white">
+        <div class="lg:col-span-5 bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+              <h3 class="text-base font-bold text-slate-800 font-heading flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mr-2 text-sm">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </span>
+                แบบฟอร์มส่งรายงานการประเมิน
+              </h3>
+              <span id="badgeWorkType" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Green</span>
             </div>
 
-            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg shadow transition duration-200 text-sm">
-              ส่งแบบประเมิน
-            </button>
-          </form>
+            <form id="reportForm" onsubmit="handleReportSubmit(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">ปีงบประมาณที่ประเมิน <span class="text-rose-500">*</span></label>
+                <select id="formEvalYear" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm bg-white">
+                  <option value="2569">2569</option>
+                  <option value="2568">2568</option>
+                  <option value="2567">2567</option>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อผู้ส่งรายงาน <span class="text-rose-500">*</span></label>
+                  <input type="text" id="formSenderName" placeholder="ระบุชื่อ-นามสกุล" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">เบอร์โทรศัพท์ <span class="text-rose-500">*</span></label>
+                  <input type="tel" id="formSenderPhone" placeholder="เช่น 0812345678" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="block text-xs font-semibold text-slate-700">หมวดที่ต้องการแก้ไข/ส่งเพิ่ม <span class="text-rose-500">*</span></label>
+                  <span class="text-[10px] text-slate-400">(กด Ctrl/Cmd เพื่อเลือกหลายหมวด)</span>
+                </div>
+                <select id="formCategories" multiple onchange="onCategoryChange()" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-xs bg-white h-24">
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">ข้อ/ประเด็นที่แก้ไข</label>
+                <select id="formItems" multiple class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-xs bg-white h-24">
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียดเพิ่มเติม</label>
+                <textarea id="formDetails" rows="2" placeholder="อธิบายสรุปการแก้ไขเพิ่มเติม..." class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-xs"></textarea>
+              </div>
+              
+              <!-- Styled Direct PDF Upload Input -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">แนบไฟล์หลักฐาน PDF <span class="text-rose-500">* (สูงสุด 10MB)</span></label>
+                <div class="relative border-2 border-dashed border-emerald-200 hover:border-emerald-400 bg-emerald-50/30 hover:bg-emerald-50/60 rounded-xl p-3 transition text-center group cursor-pointer">
+                  <input type="file" id="formPdfFile" accept="application/pdf" required onchange="updateFilePreview(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                  <div class="flex flex-col items-center justify-center space-y-1">
+                    <i class="fa-solid fa-file-pdf text-2xl text-emerald-600 group-hover:scale-110 transition-transform"></i>
+                    <p id="pdfFileName" class="text-xs font-medium text-slate-700">คลิก หรือ ลากไฟล์ PDF มาวางที่นี่</p>
+                    <p class="text-[10px] text-slate-400">รองรับเฉพาะไฟล์ .pdf ขนาดไม่เกิน 10MB</p>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl shadow-md transition duration-200 text-sm font-heading flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-paper-plane text-xs"></i>
+                <span>ส่งแบบประเมิน</span>
+              </button>
+            </form>
+          </div>
         </div>
 
         <!-- History Table Section -->
-        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <h3 class="text-base font-bold text-slate-800 mb-4 pb-2 border-b flex items-center justify-between">
-            <span><i class="fa-solid fa-clock-rotate-left text-emerald-600 mr-2"></i>ประวัติการส่งรายงาน</span>
-            <button onclick="loadHospitalHistory()" class="text-xs text-emerald-600 hover:underline"><i class="fa-solid fa-arrows-rotate mr-1"></i>รีเฟรช</button>
-          </h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-              <thead class="bg-slate-50 text-slate-600 text-xs font-semibold uppercase">
-                <tr>
+        <div class="lg:col-span-7 bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col">
+          <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+            <h3 class="text-base font-bold text-slate-800 font-heading flex items-center">
+              <span class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center mr-2 text-sm">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+              </span>
+              ประวัติการส่งรายงาน
+            </h3>
+            <button onclick="loadHospitalHistory()" class="text-xs text-emerald-600 hover:text-emerald-800 font-medium flex items-center space-x-1 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span>รีเฟรช</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto flex-grow">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 text-[11px] font-semibold uppercase tracking-wider border-y border-slate-100">
                   <th class="p-3">วันที่ส่ง</th>
-                  <th class="p-3">ปีงบฯ</th>
-                  <th class="p-3">หมวด/ข้อ</th>
-                  <th class="p-3">ไฟล์</th>
-                  <th class="p-3">สถานะ</th>
+                  <th class="p-3 text-center">ปีงบฯ</th>
+                  <th class="p-3">หมวด / ข้อที่แก้ไข</th>
+                  <th class="p-3 text-center">ไฟล์หลักฐาน</th>
+                  <th class="p-3 text-center">สถานะ</th>
                   <th class="p-3">ข้อเสนอแนะ</th>
                 </tr>
               </thead>
-              <tbody id="hospitalHistoryBody" class="divide-y divide-slate-100">
+              <tbody id="hospitalHistoryBody" class="divide-y divide-slate-100 text-xs">
                 <!-- Records injected by JS -->
               </tbody>
             </table>
           </div>
         </div>
+
       </div>
     </div>
 
     <!-- VIEW 3: ADMIN DASHBOARD -->
     <div id="adminView" class="hidden space-y-6">
+      
       <!-- Admin Top KPIs -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-          <p class="text-xs text-slate-500 font-medium">ส่งงานทั้งหมด</p>
-          <p id="kpiTotal" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-slate-500">ส่งงานทั้งหมด</p>
+            <p id="kpiTotal" class="text-2xl font-bold font-heading text-slate-800 mt-1">0</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-folder-open"></i>
+          </div>
         </div>
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-          <p class="text-xs text-amber-600 font-medium">รอตรวจสอบ</p>
-          <p id="kpiPending" class="text-2xl font-bold text-amber-600 mt-1">0</p>
+
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-amber-600">รอตรวจสอบ</p>
+            <p id="kpiPending" class="text-2xl font-bold font-heading text-amber-600 mt-1">0</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-hourglass-half"></i>
+          </div>
         </div>
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-          <p class="text-xs text-emerald-600 font-medium">ผ่านเกณฑ์</p>
-          <p id="kpiApproved" class="text-2xl font-bold text-emerald-600 mt-1">0</p>
+
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-emerald-600">ผ่านเกณฑ์</p>
+            <p id="kpiApproved" class="text-2xl font-bold font-heading text-emerald-600 mt-1">0</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
         </div>
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-          <p class="text-xs text-rose-600 font-medium">ต้องแก้ไข</p>
-          <p id="kpiRevise" class="text-2xl font-bold text-rose-600 mt-1">0</p>
+
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-rose-600">ต้องแก้ไข</p>
+            <p id="kpiRevise" class="text-2xl font-bold font-heading text-rose-600 mt-1">0</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
         </div>
       </div>
 
       <!-- Admin Actions / Filters -->
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-4 items-center justify-between">
-        <div class="flex items-center space-x-3">
-          <select id="adminWorkTypeFilter" onchange="loadAdminSubmissions()" class="px-3 py-1.5 border rounded-lg text-sm bg-white">
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap gap-3 items-center justify-between">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold text-slate-500 mr-1"><i class="fa-solid fa-filter mr-1"></i>ตัวกรอง:</span>
+          <select id="adminWorkTypeFilter" onchange="loadAdminSubmissions()" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs bg-slate-50 font-medium focus:ring-2 focus:ring-emerald-500 outline-none">
             <option value="Green">Green & Clean Hospital</option>
             <option value="Occ">อาชีวอนามัยฯ</option>
           </select>
-          <select id="adminStatusFilter" onchange="loadAdminSubmissions()" class="px-3 py-1.5 border rounded-lg text-sm bg-white">
+          <select id="adminStatusFilter" onchange="loadAdminSubmissions()" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs bg-slate-50 font-medium focus:ring-2 focus:ring-emerald-500 outline-none">
             <option value="ทั้งหมด">ทุกสถานะ</option>
             <option value="รอตรวจสอบ">รอตรวจสอบ</option>
             <option value="ผ่านเกณฑ์">ผ่านเกณฑ์</option>
             <option value="ต้องแก้ไขเพิ่มเติม">ต้องแก้ไขเพิ่มเติม</option>
           </select>
         </div>
-        <button onclick="loadAdminSubmissions()" class="text-xs text-emerald-600 hover:underline">
-          <i class="fa-solid fa-arrows-rotate mr-1"></i>อัปเดตข้อมูล
+        <button onclick="loadAdminSubmissions()" class="text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition flex items-center space-x-1">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>อัปเดตข้อมูล</span>
         </button>
       </div>
 
       <!-- Admin Table -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 text-slate-600 text-xs font-semibold uppercase">
-              <tr>
-                <th class="p-3">วันที่</th>
-                <th class="p-3">โรงพยาบาล</th>
-                <th class="p-3">ผู้ส่ง</th>
-                <th class="p-3">หมวด/ข้อ</th>
-                <th class="p-3">ไฟล์</th>
-                <th class="p-3">สถานะ</th>
-                <th class="p-3">จัดการ</th>
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-100">
+                <th class="p-3.5">วันที่ส่ง</th>
+                <th class="p-3.5">โรงพยาบาล</th>
+                <th class="p-3.5">ผู้ส่งรายงาน</th>
+                <th class="p-3.5">หมวด / ข้อ</th>
+                <th class="p-3.5 text-center">ไฟล์หลักฐาน</th>
+                <th class="p-3.5 text-center">สถานะ</th>
+                <th class="p-3.5 text-center">การจัดการ</th>
               </tr>
             </thead>
             <tbody id="adminSubmissionsBody" class="divide-y divide-slate-100">
+              <!-- Admin Submissions injected by JS -->
             </tbody>
           </table>
         </div>
       </div>
+
     </div>
 
   </main>
@@ -259,6 +475,31 @@
 
     function showSpinner() { document.getElementById('loadingSpinner').classList.remove('hidden'); }
     function hideSpinner() { document.getElementById('loadingSpinner').classList.add('hidden'); }
+
+    function togglePasswordVisibility() {
+      const input = document.getElementById('loginPassword');
+      const icon = document.getElementById('passwordToggleIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    function updateFilePreview(input) {
+      const label = document.getElementById('pdfFileName');
+      if (input.files && input.files[0]) {
+        label.innerText = `📄 ${input.files[0].name} (${(input.files[0].size / (1024 * 1024)).toFixed(2)} MB)`;
+        label.classList.add('text-emerald-700', 'font-semibold');
+      } else {
+        label.innerText = 'คลิก หรือ ลากไฟล์ PDF มาวางที่นี่';
+        label.classList.remove('text-emerald-700', 'font-semibold');
+      }
+    }
 
     // LOGIN
     function handleLogin(e) {
@@ -274,17 +515,23 @@
             currentUser = res.user;
             setupUserSession();
           } else {
-            Swal.fire('ข้อผิดพลาด', res.message, 'error');
+            Swal.fire({
+              icon: 'error',
+              title: 'เข้าสู่ระบบไม่สำเร็จ',
+              text: res.message,
+              confirmButtonColor: '#16a34a'
+            });
           }
         }).loginUser(u, p);
       } else {
-        // Mock Preview User
+        // Mock Preview User for local / GitHub Pages testing
         hideSpinner();
+        const isAdmin = u.toLowerCase().includes('admin');
         currentUser = {
-          hospitalId: u,
-          hospitalName: 'โรงพยาบาลตัวอย่าง',
+          hospitalId: u || 'H10668',
+          hospitalName: isAdmin ? 'ผู้ดูแลระบบ (Admin)' : 'โรงพยาบาลตัวอย่างสาธิต',
           hospitalType: 'รพช.',
-          role: u.toLowerCase().includes('admin') ? 'Admin' : 'Hospital'
+          role: isAdmin ? 'Admin' : 'Hospital'
         };
         setupUserSession();
       }
@@ -302,6 +549,8 @@
         loadAdminSubmissions();
       } else {
         document.getElementById('hospitalView').classList.remove('hidden');
+        document.getElementById('displayHspName').innerText = currentUser.hospitalName;
+        document.getElementById('displayHspSub').innerText = `รหัสโรงพยาบาล: ${currentUser.hospitalId} | ประเภท: ${currentUser.hospitalType}`;
         switchWorkType('Green');
       }
     }
@@ -315,13 +564,18 @@
       currentHspWorkType = type;
       const greenBtn = document.getElementById('tabGreenBtn');
       const occBtn = document.getElementById('tabOccBtn');
+      const badge = document.getElementById('badgeWorkType');
 
       if (type === 'Green') {
-        greenBtn.className = "pb-3 px-4 text-sm font-bold border-b-2 border-emerald-600 text-emerald-600 transition";
-        occBtn.className = "pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition";
+        greenBtn.className = "flex-1 py-2.5 px-4 text-xs sm:text-sm font-semibold rounded-xl transition duration-200 flex items-center justify-center space-x-2 bg-emerald-600 text-white shadow-sm font-heading";
+        occBtn.className = "flex-1 py-2.5 px-4 text-xs sm:text-sm font-semibold rounded-xl transition duration-200 flex items-center justify-center space-x-2 text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-heading";
+        badge.innerText = "Green & Clean";
+        badge.className = "text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
       } else {
-        occBtn.className = "pb-3 px-4 text-sm font-bold border-b-2 border-emerald-600 text-emerald-600 transition";
-        greenBtn.className = "pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition";
+        occBtn.className = "flex-1 py-2.5 px-4 text-xs sm:text-sm font-semibold rounded-xl transition duration-200 flex items-center justify-center space-x-2 bg-teal-600 text-white shadow-sm font-heading";
+        greenBtn.className = "flex-1 py-2.5 px-4 text-xs sm:text-sm font-semibold rounded-xl transition duration-200 flex items-center justify-center space-x-2 text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-heading";
+        badge.innerText = "อาชีวอนามัยฯ";
+        badge.className = "text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-teal-100 text-teal-800";
       }
 
       loadMasterData();
@@ -337,8 +591,20 @@
           renderCategoryOptions(res.categories || []);
         }).getMasterData(currentHspWorkType, currentUser.hospitalType);
       } else {
+        // Mock Master Data for preview
         hideSpinner();
-        renderCategoryOptions(['หมวดที่ 1 สะอาด', 'หมวดที่ 2 สิ่งแวดล้อม']);
+        if (currentHspWorkType === 'Green') {
+          masterDataCache = {
+            'หมวดที่ 1 G - Garbage (ขยะ)': ['1.1 คัดแยกขยะมูลฝอยถูกต้อง', '1.2 มีที่พักขยะได้มาตรฐาน'],
+            'หมวดที่ 2 R - Clean Restroom (ห้องน้ำ)': ['2.1 ห้องน้ำสะอาดไม่มีกลิ่น', '2.2 มีสบู่ล้างมือเพียงพอ']
+          };
+        } else {
+          masterDataCache = {
+            'หมวดที่ 1 การบริหารจัดการ': ['1.1 มีนโยบายด้านอาชีวอนามัย', '1.2 มีแผนงบประมานดำเนินงาน'],
+            'หมวดที่ 2 การประเมินความเสี่ยง': ['2.1 มีการสำรวจความเสี่ยงจากการทำงาน']
+          };
+        }
+        renderCategoryOptions(Object.keys(masterDataCache));
       }
     }
 
@@ -416,7 +682,14 @@
           google.script.run.withSuccessHandler(res => {
             hideSpinner();
             if (res.success) {
-              Swal.fire('สำเร็จ', res.message, 'success');
+              Swal.fire({
+                icon: 'success',
+                title: 'สำเร็จ',
+                text: res.message,
+                confirmButtonColor: '#16a34a'
+              });
+              document.getElementById('reportForm').reset();
+              updateFilePreview(fileInput);
               loadHospitalHistory();
             } else {
               Swal.fire('ผิดพลาด', res.message, 'error');
@@ -424,7 +697,25 @@
           }).submitHospitalReport(formObj);
         } else {
           hideSpinner();
-          Swal.fire('สำเร็จ (Preview)', 'อัปโหลดไฟล์เรียบร้อยแล้ว', 'success');
+          Swal.fire({
+            icon: 'success',
+            title: 'สำเร็จ (Preview)',
+            text: 'ส่งแบบประเมินและอัปโหลดไฟล์จำลองเรียบร้อยแล้ว',
+            confirmButtonColor: '#16a34a'
+          });
+          document.getElementById('reportForm').reset();
+          updateFilePreview(fileInput);
+          renderHospitalHistory([
+            {
+              date: '09/08/2569 10:30',
+              evalYear: formObj.evalYear,
+              categories: selCats.join(', '),
+              items: selItems.join(', '),
+              fileUrl: '#',
+              status: 'รอตรวจสอบ',
+              remark: '-'
+            }
+          ]);
         }
       };
 
@@ -434,29 +725,50 @@
     function loadHospitalHistory() {
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run.withSuccessHandler(renderHospitalHistory).getHospitalSubmissionHistory(currentUser.hospitalId, currentHspWorkType);
+      } else {
+        renderHospitalHistory([
+          {
+            date: '08/08/2569 14:20',
+            evalYear: '2569',
+            categories: 'หมวดที่ 1 G - Garbage',
+            items: '1.1 คัดแยกขยะมูลฝอยถูกต้อง',
+            fileUrl: '#',
+            status: 'ผ่านเกณฑ์',
+            remark: 'ดำเนินการได้ถูกต้องสมบูรณ์'
+          },
+          {
+            date: '05/08/2569 09:15',
+            evalYear: '2569',
+            categories: 'หมวดที่ 2 R - Clean Restroom',
+            items: '2.1 ห้องน้ำสะอาดไม่มีกลิ่น',
+            fileUrl: '#',
+            status: 'รอตรวจสอบ',
+            remark: '-'
+          }
+        ]);
       }
     }
 
     function renderHospitalHistory(data) {
       const tbody = document.getElementById('hospitalHistoryBody');
       if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">ยังไม่มีประวัติการส่งงาน</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">ยังไม่มีประวัติการส่งรายงาน</td></tr>`;
         return;
       }
 
       tbody.innerHTML = data.map(r => `
-        <tr class="hover:bg-slate-50">
-          <td class="p-3 text-xs text-slate-500">${r.date}</td>
-          <td class="p-3 text-xs font-semibold">${r.evalYear}</td>
-          <td class="p-3 text-xs">
-            <p class="font-medium text-slate-800">${r.categories || '-'}</p>
-            <p class="text-slate-400 text-[11px]">${r.items || '-'}</p>
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-3 whitespace-nowrap text-slate-500 font-mono text-[11px]">${r.date}</td>
+          <td class="p-3 whitespace-nowrap text-center font-bold text-slate-700">${r.evalYear}</td>
+          <td class="p-3">
+            <p class="font-semibold text-slate-800">${r.categories || '-'}</p>
+            <p class="text-slate-500 text-[11px] mt-0.5">${r.items || '-'}</p>
           </td>
-          <td class="p-3 text-xs">
-            ${r.fileUrl ? `<a href="${r.fileUrl}" target="_blank" class="text-emerald-600 hover:underline"><i class="fa-solid fa-file-pdf mr-1"></i>เปิดดู</a>` : '-'}
+          <td class="p-3 whitespace-nowrap text-center">
+            ${r.fileUrl ? `<a href="${r.fileUrl}" target="_blank" class="inline-flex items-center space-x-1 text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition font-medium"><i class="fa-solid fa-file-pdf"></i><span>ดู PDF</span></a>` : '-'}
           </td>
-          <td class="p-3 text-xs">${getStatusBadge(r.status)}</td>
-          <td class="p-3 text-xs text-slate-500">${r.remark || '-'}</td>
+          <td class="p-3 whitespace-nowrap text-center">${getStatusBadge(r.status)}</td>
+          <td class="p-3 text-slate-600">${r.remark || '-'}</td>
         </tr>
       `).join('');
     }
@@ -470,6 +782,11 @@
           document.getElementById('kpiApproved').innerText = res.kpis.approved;
           document.getElementById('kpiRevise').innerText = res.kpis.revise;
         }).getAdminDashboardData({ workType: 'ทั้งหมด' });
+      } else {
+        document.getElementById('kpiTotal').innerText = '12';
+        document.getElementById('kpiPending').innerText = '4';
+        document.getElementById('kpiApproved').innerText = '6';
+        document.getElementById('kpiRevise').innerText = '2';
       }
     }
 
@@ -486,29 +803,65 @@
         }).getSubmissionsForAdmin(wt, st);
       } else {
         hideSpinner();
+        adminSubmissionsCache = [
+          {
+            rowIndex: 2,
+            workType: wt,
+            date: '09/08/2569 11:00',
+            hospitalId: 'H10668',
+            hospitalName: 'โรงพยาบาลปาย',
+            senderName: 'นายสมชาย ใจดี',
+            senderPhone: '081-234-5678',
+            categories: 'หมวดที่ 1 G - Garbage',
+            items: '1.1 คัดแยกขยะมูลฝอย',
+            details: 'แนบหลักฐานภาพถ่ายการคัดแยกขยะใหม่',
+            fileUrl: '#',
+            status: 'รอตรวจสอบ',
+            remark: '',
+            level: ''
+          },
+          {
+            rowIndex: 3,
+            workType: wt,
+            date: '08/08/2569 15:30',
+            hospitalId: 'H10669',
+            hospitalName: 'โรงพยาบาลปางหม่า',
+            senderName: 'นางสาวสมหญิง รักดี',
+            senderPhone: '089-876-5432',
+            categories: 'หมวดที่ 2 R - Clean Restroom',
+            items: '2.1 ห้องน้ำสะอาด',
+            details: 'ทำความสะอาดสัปดาห์ละ 3 ครั้ง',
+            fileUrl: '#',
+            status: 'ผ่านเกณฑ์',
+            remark: 'ผ่านเกณฑ์มาตรฐานระดับดีเยี่ยม',
+            level: 'ระดับดีเยี่ยม'
+          }
+        ];
+        renderAdminSubmissions(adminSubmissionsCache);
       }
     }
 
     function renderAdminSubmissions(data) {
       const tbody = document.getElementById('adminSubmissionsBody');
       if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">ไม่พบข้อมูลการส่งงาน</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">ไม่พบข้อมูลการส่งรายงาน</td></tr>`;
         return;
       }
 
       tbody.innerHTML = data.map((r, idx) => `
-        <tr class="hover:bg-slate-50">
-          <td class="p-3 text-xs text-slate-500">${r.date}</td>
-          <td class="p-3 text-xs font-semibold text-slate-800">${r.hospitalName}</td>
-          <td class="p-3 text-xs">${r.senderName}<br><span class="text-slate-400">${r.senderPhone}</span></td>
-          <td class="p-3 text-xs max-w-xs truncate">${r.categories}</td>
-          <td class="p-3 text-xs">
-            ${r.fileUrl ? `<a href="${r.fileUrl}" target="_blank" class="text-emerald-600 hover:underline"><i class="fa-solid fa-file-pdf mr-1"></i>ดู PDF</a>` : '-'}
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-3.5 whitespace-nowrap text-slate-500 font-mono text-[11px]">${r.date}</td>
+          <td class="p-3.5 whitespace-nowrap font-bold text-slate-800">${r.hospitalName}</td>
+          <td class="p-3.5 whitespace-nowrap">${r.senderName}<br><span class="text-slate-400 text-[11px]">${r.senderPhone}</span></td>
+          <td class="p-3.5 max-w-xs truncate">${r.categories}</td>
+          <td class="p-3.5 whitespace-nowrap text-center">
+            ${r.fileUrl ? `<a href="${r.fileUrl}" target="_blank" class="inline-flex items-center space-x-1 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition"><i class="fa-solid fa-file-pdf"></i><span>เปิด PDF</span></a>` : '-'}
           </td>
-          <td class="p-3 text-xs">${getStatusBadge(r.status)}</td>
-          <td class="p-3 text-xs">
-            <button onclick="openReviewModal(${idx})" class="bg-slate-800 hover:bg-slate-900 text-white px-2.5 py-1 rounded text-xs transition">
-              ตรวจงาน
+          <td class="p-3.5 whitespace-nowrap text-center">${getStatusBadge(r.status)}</td>
+          <td class="p-3.5 whitespace-nowrap text-center">
+            <button onclick="openReviewModal(${idx})" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition shadow-sm inline-flex items-center space-x-1">
+              <i class="fa-solid fa-pen-to-square"></i>
+              <span>ตรวจงาน</span>
             </button>
           </td>
         </tr>
@@ -518,33 +871,39 @@
     function openReviewModal(idx) {
       const item = adminSubmissionsCache[idx];
       Swal.fire({
-        title: `ตรวจงาน: ${item.hospitalName}`,
+        title: `<span class="font-heading font-bold text-lg">ตรวจงาน: ${item.hospitalName}</span>`,
         html: `
-          <div class="text-left text-sm space-y-3">
-            <p><strong>หมวด:</strong> ${item.categories}</p>
-            <p><strong>ประเด็น:</strong> ${item.items}</p>
-            <p><strong>รายละเอียด:</strong> ${item.details || '-'}</p>
-            <hr>
+          <div class="text-left text-xs space-y-3 pt-2">
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+              <p><strong>หมวดที่ส่ง:</strong> ${item.categories}</p>
+              <p><strong>ข้อ/ประเด็น:</strong> ${item.items}</p>
+              <p><strong>รายละเอียด:</strong> ${item.details || '-'}</p>
+            </div>
             <div>
-              <label class="block font-medium mb-1">ผลการตรวจ</label>
-              <select id="swalStatus" class="w-full p-2 border rounded">
+              <label class="block font-semibold mb-1 text-slate-700">ผลการตรวจประเมิน <span class="text-rose-500">*</span></label>
+              <select id="swalStatus" class="w-full p-2 border border-slate-200 rounded-xl text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
                 <option value="ผ่านเกณฑ์" ${item.status === 'ผ่านเกณฑ์' ? 'selected' : ''}>ผ่านเกณฑ์</option>
                 <option value="ต้องแก้ไขเพิ่มเติม" ${item.status === 'ต้องแก้ไขเพิ่มเติม' ? 'selected' : ''}>ต้องแก้ไขเพิ่มเติม</option>
               </select>
             </div>
             <div>
-              <label class="block font-medium mb-1">ระดับการรับรอง (ถ้ามี)</label>
-              <input type="text" id="swalLevel" value="${item.level || ''}" placeholder="เช่น ระดับดีมาก" class="w-full p-2 border rounded">
+              <label class="block font-semibold mb-1 text-slate-700">ระดับการรับรอง (ถ้ามี)</label>
+              <input type="text" id="swalLevel" value="${item.level || ''}" placeholder="เช่น ระดับดีมาก / ดีเยี่ยม" class="w-full p-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500">
             </div>
             <div>
-              <label class="block font-medium mb-1">ข้อเสนอแนะเพิ่มเติม</label>
-              <textarea id="swalRemark" class="w-full p-2 border rounded" rows="2">${item.remark || ''}</textarea>
+              <label class="block font-semibold mb-1 text-slate-700">ข้อเสนอแนะเพิ่มเติม</label>
+              <textarea id="swalRemark" class="w-full p-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500" rows="3" placeholder="ระบุข้อเสนอแนะให้โรงพยาบาล...">${item.remark || ''}</textarea>
             </div>
           </div>
         `,
         showCancelButton: true,
-        confirmButtonText: 'บันทึกผล',
+        confirmButtonText: 'บันทึกผลการตรวจ',
         cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#16a34a',
+        cancelButtonColor: '#64748b',
+        customClass: {
+          popup: 'rounded-2xl'
+        },
         preConfirm: () => {
           return {
             rowIndex: item.rowIndex,
@@ -561,10 +920,18 @@
           if (typeof google !== 'undefined' && google.script && google.script.run) {
             google.script.run.withSuccessHandler(res => {
               hideSpinner();
-              Swal.fire('สำเร็จ', res.message, 'success');
+              Swal.fire({
+                icon: 'success',
+                title: 'สำเร็จ',
+                text: res.message,
+                confirmButtonColor: '#16a34a'
+              });
               loadAdminDashboard();
               loadAdminSubmissions();
             }).updateSubmissionStatus(result.value);
+          } else {
+            hideSpinner();
+            Swal.fire('สำเร็จ (Preview)', 'อัปเดตสถานะจำลองเรียบร้อยแล้ว', 'success');
           }
         }
       });
@@ -572,11 +939,11 @@
 
     function getStatusBadge(status) {
       if (status === 'ผ่านเกณฑ์') {
-        return `<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[11px] font-semibold">ผ่านเกณฑ์</span>`;
+        return `<span class="inline-flex items-center space-x-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[11px] font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>ผ่านเกณฑ์</span></span>`;
       } else if (status === 'ต้องแก้ไขเพิ่มเติม') {
-        return `<span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full text-[11px] font-semibold">ต้องแก้ไขเพิ่มเติม</span>`;
+        return `<span class="inline-flex items-center space-x-1 bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-0.5 rounded-full text-[11px] font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span><span>ต้องแก้ไขเพิ่มเติม</span></span>`;
       }
-      return `<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-[11px] font-semibold">รอตรวจสอบ</span>`;
+      return `<span class="inline-flex items-center space-x-1 bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full text-[11px] font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span><span>รอตรวจสอบ</span></span>`;
     }
 
     function loadManuals() {
@@ -584,12 +951,20 @@
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run.withSuccessHandler(res => {
           hideSpinner();
-          const list = res.map(m => `<li><a href="${m.url}" target="_blank" class="text-emerald-600 hover:underline">${m.title}</a></li>`).join('');
+          const list = res.map(m => `<li class="p-2 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between"><span class="font-medium text-slate-700">${m.title}</span><a href="${m.url}" target="_blank" class="text-emerald-600 hover:text-emerald-800 font-semibold text-xs bg-emerald-50 px-2.5 py-1 rounded-lg">เปิดดู</a></li>`).join('');
           Swal.fire({
-            title: 'คู่มือการใช้งาน',
-            html: `<ul class="text-left text-sm space-y-2">${list || 'ไม่มีคู่มือในระบบ'}</ul>`
+            title: '<span class="font-heading font-bold text-lg">คู่มือการใช้งานระบบ</span>',
+            html: `<ul class="text-left text-xs space-y-2 mt-2">${list || '<p class="text-center text-slate-400">ไม่มีคู่มือในระบบ</p>'}</ul>`,
+            confirmButtonColor: '#16a34a'
           });
         }).getManualsData(currentUser ? currentUser.role : 'Hospital');
+      } else {
+        hideSpinner();
+        Swal.fire({
+          title: '<span class="font-heading font-bold text-lg">คู่มือการใช้งานระบบ</span>',
+          html: `<ul class="text-left text-xs space-y-2 mt-2"><li class="p-2 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between"><span class="font-medium text-slate-700">คู่มือการใช้งานระบบติดตามงานประเมินฯ</span><a href="#" class="text-emerald-600 hover:text-emerald-800 font-semibold text-xs bg-emerald-50 px-2.5 py-1 rounded-lg">เปิดดู</a></li></ul>`,
+          confirmButtonColor: '#16a34a'
+        });
       }
     }
   </script>
