@@ -3,552 +3,594 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบติดตามการปรับปรุงแก้ไขหลังการประเมินมาตรฐานโรงพยาบาล สำนักงานสาธารณสุขจังหวัดนครราชสีมา</title>
-  
-  <!-- CSS Frameworks -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>ระบบติดตามงานการประเมินมาตรฐานโรงพยาบาล</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SweetAlert2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    body { font-family: 'Sarabun', sans-serif; background-color: #f4f6f9; }
-    .bg-korat { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
-    .bg-green-gradient { background: linear-gradient(135deg, #134e5e 0%, #71b280 100%); }
-    .card-stat { border: none; border-radius: 12px; transition: transform 0.2s; }
-    .card-stat:hover { transform: translateY(-3px); }
-    .badge-status { font-size: 0.85rem; padding: 6px 12px; border-radius: 20px; }
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background-color: #f8fafc;
+    }
+    .spinner-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      display: flex; justify-content: center; align-items: center;
+      z-index: 9999;
+    }
   </style>
 </head>
-<body>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-  <!-- Full-Screen Login Section (พื้นหลังสีเขียว-เขียวอ่อน) -->
-  <div id="loginSection" class="min-vh-100 d-flex align-items-center justify-content-center bg-green-gradient py-5 px-3">
-    <div class="card shadow-lg border-0 rounded-4 p-4 p-md-5" style="max-width: 500px; width: 100%;">
-      <div class="text-center mb-4">
-        <!-- ส่วนรูปภาพโลโก้/ไอคอนหน้า Login (สามารถเปลี่ยนลิงก์รูปภาพใน src ได้ตามต้องการ) -->
-        <div class="mb-3">
-          <img src="logo.png" alt="Logo" class="rounded-circle shadow-sm bg-light p-2" style="width: 120px; height: 120px; object-fit: contain;">
-        </div>
-        <h5 class="fw-bold text-dark mb-1">ระบบติดตามการปรับปรุงแก้ไข</h5>
-        <h5 class="fw-bold text-dark mb-2">หลังการประเมินมาตรฐานโรงพยาบาล</h5>
-        <div class="text-success fw-bold" style="font-size: 0.9rem;">สำนักงานสาธารณสุขจังหวัดนครราชสีมา</div>
-      </div>
-      <form onsubmit="handleLogin(event)">
-        <div class="mb-3">
-          <label class="form-label fw-bold text-secondary small">เลือกโรงพยาบาล / หน่วยงาน</label>
-          <select id="loginHospitalSelect" class="form-select form-select-lg fs-6" required>
-            <option value="">-- กำลังโหลดรายชื่อ รพ. --</option>
-          </select>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-bold text-secondary small">รหัสผ่าน</label>
-          <input type="password" id="loginPasscode" class="form-control form-control-lg fs-6" placeholder="กรอกรหัสผ่าน" required>
-        </div>
-        <div class="mb-4">
-          <label class="form-label fw-bold text-secondary small">ชื่อผู้เข้าใช้งาน</label>
-          <input type="text" id="loginSenderName" class="form-control form-control-lg fs-6" placeholder="กรอกชื่อ-นามสกุลผู้ใช้งาน" required>
-        </div>
-        <!-- ปุ่มเข้าสู่ระบบ สีฟ้า -->
-        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-2 shadow-sm" style="background-color: #0d6efd; border-color: #0d6efd;">
-          <i class="fa-solid fa-right-to-bracket me-2"></i>เข้าสู่ระบบ
-        </button>
-      </form>
+  <!-- Spinner Loading -->
+  <div id="loadingSpinner" class="spinner-overlay hidden">
+    <div class="bg-white p-5 rounded-2xl shadow-xl flex items-center space-x-4">
+      <div class="animate-spin rounded-full h-8 w-8 border-4 border-emerald-500 border-t-transparent"></div>
+      <span class="text-slate-700 font-medium">กำลังดำเนินการ...</span>
     </div>
   </div>
 
-  <!-- Main System Content (โครงสร้างระบบภายในคงเดิม 100%) -->
-  <div id="systemContent" class="d-none">
-    <!-- Navbar Header -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-korat shadow-sm sticky-top">
-      <div class="container">
-        <a class="navbar-brand fw-bold" href="#">
-          <i class="fa-solid fa-hospital-user me-2"></i>ระบบติดตามงานประเมินมาตรฐาน รพ. (สสจ.นครราชสีมา)
-        </a>
-        <div id="navbarUserArea" class="d-flex align-items-center gap-3 d-none">
-          <span id="userInfo" class="text-white small fw-medium"></span>
-          <button id="btnLogout" class="btn btn-outline-light btn-sm fw-bold rounded-pill px-3" onclick="logout()">
-            <i class="fa-solid fa-right-from-bracket me-1"></i> ออกจากระบบ
+  <!-- Navbar -->
+  <nav class="bg-emerald-700 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex items-center space-x-3">
+          <i class="fa-solid font-bold text-2xl text-emerald-200 fa-hospital-user"></i>
+          <span class="font-bold text-lg sm:text-xl tracking-tight">ระบบติดตามงานมาตรฐานโรงพยาบาล</span>
+        </div>
+        <div id="userInfoSection" class="hidden flex items-center space-x-4">
+          <div class="text-right hidden sm:block">
+            <p id="navUserName" class="text-sm font-semibold leading-none"></p>
+            <p id="navUserRole" class="text-xs text-emerald-200 mt-1"></p>
+          </div>
+          <button onclick="logout()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-2 rounded-lg transition flex items-center space-x-1">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>ออกจากระบบ</span>
           </button>
         </div>
       </div>
-    </nav>
+    </div>
+  </nav>
 
-    <div class="container py-4">
-      <!-- สรุปสถานะ (Dashboard Cards) -->
-      <div class="row g-3 mb-4">
-        <div class="col-12 col-sm-6 col-md-3">
-          <div class="card card-stat bg-white shadow-sm p-3 border-start border-4 border-primary">
-            <div class="text-muted small fw-bold">รายงานทั้งหมด</div>
-            <div class="h3 fw-bold mb-0 text-primary" id="statTotal">0</div>
-          </div>
-        </div>
-        <div class="col-12 col-sm-6 col-md-3">
-          <div class="card card-stat bg-white shadow-sm p-3 border-start border-4 border-warning">
-            <div class="text-muted small fw-bold">รอตรวจสอบ</div>
-            <div class="h3 fw-bold mb-0 text-warning" id="statPending">0</div>
-          </div>
-        </div>
-        <div class="col-12 col-sm-6 col-md-3">
-          <div class="card card-stat bg-white shadow-sm p-3 border-start border-4 border-success">
-            <div class="text-muted small fw-bold">ผ่านการตรวจสอบ</div>
-            <div class="h3 fw-bold mb-0 text-success" id="statApproved">0</div>
-          </div>
-        </div>
-        <div class="col-12 col-sm-6 col-md-3">
-          <div class="card card-stat bg-white shadow-sm p-3 border-start border-4 border-danger">
-            <div class="text-muted small fw-bold">ต้องแก้ไขเพิ่มเติม</div>
-            <div class="h3 fw-bold mb-0 text-danger" id="statRevision">0</div>
-          </div>
-        </div>
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+    <!-- VIEW 1: LOGIN -->
+    <div id="loginView" class="max-w-md mx-auto mt-10 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+      <div class="bg-emerald-600 p-6 text-center text-white">
+        <i class="fa-solid fa-shield-halved text-4xl mb-2 text-emerald-200"></i>
+        <h2 class="text-xl font-bold">เข้าสู่ระบบใช้งาน</h2>
+        <p class="text-xs text-emerald-100 mt-1">ป้อนรหัสโรงพยาบาลเพื่อเข้าสู่ระบบ</p>
       </div>
-      <!-- ปุ่มส่งงาน & ตัวกรอง -->
-      <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
-        <div class="row g-3 align-items-center">
-          <div class="col-12 col-md-4">
-            <button id="btnNewSubmit" class="btn btn-success fw-bold w-100 rounded-3 py-2" onclick="openSubmitModal()" disabled>
-              <i class="fa-solid fa-paper-plane me-1"></i> ส่งรายงานการปรับปรุงแก้ไขใหม่
-            </button>
+      <form onsubmit="handleLogin(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">รหัสผู้ใช้งาน / รหัสโรงพยาบาล</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <i class="fa-solid fa-user"></i>
+            </span>
+            <input type="text" id="loginUsername" required class="w-full pl-10 pr-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm">
           </div>
-          <div class="col-12 col-md-8">
-            <div class="row g-2">
-              <div class="col-12 col-sm-6">
-                <select id="filterStandard" class="form-select" onchange="filterData()">
-                  <option value="ALL">-- ทุกงานมาตรฐาน --</option>
-                  <option value="Green">Green & Clean Hospital</option>
-                  <option value="Occ">อาชีวอนามัยและเวชกรรมสิ่งแวดล้อม</option>
-                </select>
-              </div>
-              <div class="col-12 col-sm-6">
-                <input type="text" id="filterSearch" class="form-control" placeholder="🔍 ค้นหาชื่อ รพ. / ข้อแก้ไข..." onkeyup="filterData()">
-              </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">รหัสผ่าน</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <i class="fa-solid fa-lock"></i>
+            </span>
+            <input type="password" id="loginPassword" required class="w-full pl-10 pr-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm">
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg shadow-md transition duration-200 text-sm">
+          เข้าสู่ระบบ
+        </button>
+      </form>
+    </div>
+
+    <!-- VIEW 2: HOSPITAL DASHBOARD -->
+    <div id="hospitalView" class="hidden space-y-6">
+      <!-- Tabs Switcher -->
+      <div class="flex border-b border-slate-200 space-x-4">
+        <button id="tabGreenBtn" onclick="switchWorkType('Green')" class="pb-3 px-4 text-sm font-bold border-b-2 border-emerald-600 text-emerald-600 transition">
+          <i class="fa-solid fa-leaf mr-2"></i>Green & Clean Hospital
+        </button>
+        <button id="tabOccBtn" onclick="switchWorkType('Occ')" class="pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition">
+          <i class="fa-solid fa-mask-ventilator mr-2"></i>อาชีวอนามัยและเวชกรรมสิ่งแวดล้อม
+        </button>
+        <button onclick="loadManuals()" class="pb-3 px-4 text-sm font-medium text-slate-500 hover:text-emerald-600 transition ml-auto">
+          <i class="fa-solid fa-book mr-1"></i>คู่มือใช้งาน
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Form Section -->
+        <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <h3 class="text-base font-bold text-slate-800 mb-4 pb-2 border-b flex items-center">
+            <i class="fa-solid fa-paper-plane text-emerald-600 mr-2"></i>ส่งรายงานการประเมิน
+          </h3>
+          <form onsubmit="handleReportSubmit(event)" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">ปีงบประมาณที่ประเมิน</label>
+              <select id="formEvalYear" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm bg-white">
+                <option value="2569">2569</option>
+                <option value="2568">2568</option>
+                <option value="2567">2567</option>
+              </select>
             </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ส่งรายงาน</label>
+              <input type="text" id="formSenderName" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">เบอร์โทรศัพท์ติดต่อ</label>
+              <input type="tel" id="formSenderPhone" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">หมวดที่ต้องการแก้ไข/ส่งเพิ่ม</label>
+              <select id="formCategories" multiple onchange="onCategoryChange()" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm bg-white h-24">
+              </select>
+              <span class="text-xs text-slate-400">* กด Ctrl หรือ Cmd เพื่อเลือกหลายรายการ</span>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">ข้อ/ประเด็นที่แก้ไข</label>
+              <select id="formItems" multiple class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm bg-white h-28">
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">รายละเอียดเพิ่มเติม</label>
+              <textarea id="formDetails" rows="2" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"></textarea>
+            </div>
+            
+            <!-- Direct PDF Upload Input -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">แนบไฟล์หลักฐาน PDF <span class="text-red-500">* (ขนาดไม่เกิน 10MB)</span></label>
+              <input type="file" id="formPdfFile" accept="application/pdf" required class="w-full px-3 py-1.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-sm bg-white">
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg shadow transition duration-200 text-sm">
+              ส่งแบบประเมิน
+            </button>
+          </form>
+        </div>
+
+        <!-- History Table Section -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <h3 class="text-base font-bold text-slate-800 mb-4 pb-2 border-b flex items-center justify-between">
+            <span><i class="fa-solid fa-clock-rotate-left text-emerald-600 mr-2"></i>ประวัติการส่งรายงาน</span>
+            <button onclick="loadHospitalHistory()" class="text-xs text-emerald-600 hover:underline"><i class="fa-solid fa-arrows-rotate mr-1"></i>รีเฟรช</button>
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 text-slate-600 text-xs font-semibold uppercase">
+                <tr>
+                  <th class="p-3">วันที่ส่ง</th>
+                  <th class="p-3">ปีงบฯ</th>
+                  <th class="p-3">หมวด/ข้อ</th>
+                  <th class="p-3">ไฟล์</th>
+                  <th class="p-3">สถานะ</th>
+                  <th class="p-3">ข้อเสนอแนะ</th>
+                </tr>
+              </thead>
+              <tbody id="hospitalHistoryBody" class="divide-y divide-slate-100">
+                <!-- Records injected by JS -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-      <!-- ตารางแสดงรายการข้อมูล -->
-      <div class="card border-0 shadow-sm rounded-4 p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list-check me-2 text-primary"></i>รายการติดตามการแก้ไข</h5>
-          <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="loadAllData()">
-            <i class="fa-solid fa-rotate me-1"></i> โหลดข้อมูลใหม่
-          </button>
+    </div>
+
+    <!-- VIEW 3: ADMIN DASHBOARD -->
+    <div id="adminView" class="hidden space-y-6">
+      <!-- Admin Top KPIs -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <p class="text-xs text-slate-500 font-medium">ส่งงานทั้งหมด</p>
+          <p id="kpiTotal" class="text-2xl font-bold text-slate-800 mt-1">0</p>
         </div>
-        <div class="table-responsive">
-          <table class="table table-hover align-middle">
-            <thead class="table-light">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <p class="text-xs text-amber-600 font-medium">รอตรวจสอบ</p>
+          <p id="kpiPending" class="text-2xl font-bold text-amber-600 mt-1">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <p class="text-xs text-emerald-600 font-medium">ผ่านเกณฑ์</p>
+          <p id="kpiApproved" class="text-2xl font-bold text-emerald-600 mt-1">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <p class="text-xs text-rose-600 font-medium">ต้องแก้ไข</p>
+          <p id="kpiRevise" class="text-2xl font-bold text-rose-600 mt-1">0</p>
+        </div>
+      </div>
+
+      <!-- Admin Actions / Filters -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-4 items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <select id="adminWorkTypeFilter" onchange="loadAdminSubmissions()" class="px-3 py-1.5 border rounded-lg text-sm bg-white">
+            <option value="Green">Green & Clean Hospital</option>
+            <option value="Occ">อาชีวอนามัยฯ</option>
+          </select>
+          <select id="adminStatusFilter" onchange="loadAdminSubmissions()" class="px-3 py-1.5 border rounded-lg text-sm bg-white">
+            <option value="ทั้งหมด">ทุกสถานะ</option>
+            <option value="รอตรวจสอบ">รอตรวจสอบ</option>
+            <option value="ผ่านเกณฑ์">ผ่านเกณฑ์</option>
+            <option value="ต้องแก้ไขเพิ่มเติม">ต้องแก้ไขเพิ่มเติม</option>
+          </select>
+        </div>
+        <button onclick="loadAdminSubmissions()" class="text-xs text-emerald-600 hover:underline">
+          <i class="fa-solid fa-arrows-rotate mr-1"></i>อัปเดตข้อมูล
+        </button>
+      </div>
+
+      <!-- Admin Table -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-slate-600 text-xs font-semibold uppercase">
               <tr>
-                <th>วัน-เวลา</th>
-                <th>มาตรฐาน</th>
-                <th>ชื่อโรงพยาบาล</th>
-                <th>หมวด/ข้อที่แก้ไข</th>
-                <th>หลักฐาน</th>
-                <th>สถานะตรวจ</th>
-                <th>ผลประเมิน</th>
-                <th>จัดการ</th>
+                <th class="p-3">วันที่</th>
+                <th class="p-3">โรงพยาบาล</th>
+                <th class="p-3">ผู้ส่ง</th>
+                <th class="p-3">หมวด/ข้อ</th>
+                <th class="p-3">ไฟล์</th>
+                <th class="p-3">สถานะ</th>
+                <th class="p-3">จัดการ</th>
               </tr>
             </thead>
-            <tbody id="tableBody">
-              <tr>
-                <td colspan="8" class="text-center text-muted py-4">กำลังดึงข้อมูลจากระบบ...</td>
-              </tr>
+            <tbody id="adminSubmissionsBody" class="divide-y divide-slate-100">
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Modal 2: Submit Form -->
-  <div class="modal fade" id="submitModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content rounded-4 border-0 shadow">
-        <div class="modal-header bg-success text-white">
-          <h5 class="modal-title fw-bold"><i class="fa-solid fa-paper-plane me-2"></i>ส่งรายงานการปรับปรุงแก้ไข</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <form id="formSubmit" onsubmit="handleSaveSubmission(event)">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label fw-bold">งานมาตรฐานที่ต้องการส่ง</label>
-                <select id="formStandardType" class="form-select" required>
-                  <option value="Green">Green & Clean Hospital</option>
-                  <option value="Occ">อาชีวอนามัยและเวชกรรมสิ่งแวดล้อม</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-bold">ปีที่ประเมิน</label>
-                <input type="text" id="formEvalYear" class="form-control" value="2569" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-bold">ชื่อ - นามสกุลผู้ส่งงาน</label>
-                <input type="text" id="formSenderName" class="form-control bg-light" readonly required>
-                <small class="text-muted">ดึงจากชื่อผู้เข้าใช้งานอัตโนมัติ</small>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-bold">เบอร์ติดต่อ</label>
-                <input type="text" id="formPhone" class="form-control" placeholder="08X-XXXXXXX" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-bold">หมวดที่ต้องการส่งรายงานแก้ไข</label>
-                <input type="text" id="formCategory" class="form-control" placeholder="เช่น หมวด 1 G1, หมวด 3 3R" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-bold">ข้อที่ต้องการแก้ไข</label>
-                <input type="text" id="formItem" class="form-control" placeholder="เช่น ข้อ 1.2, ข้อ 3.1" required>
-              </div>
-              <div class="col-12">
-                <label class="form-label fw-bold">รายละเอียดการปรับปรุงแก้ไข</label>
-                <textarea id="formDetails" class="form-control" rows="3" placeholder="อธิบายรายละเอียดการแก้ไข..." required></textarea>
-              </div>
-              <div class="col-12">
-                <label class="form-label fw-bold">ลิงก์ไฟล์หลักฐาน (Google Drive / PDF)</label>
-                <input type="url" id="formEvidenceUrl" class="form-control" placeholder="https://drive.google.com/..." required>
-              </div>
-            </div>
-            <div class="mt-4 text-end">
-              <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">ยกเลิก</button>
-              <button type="submit" class="btn btn-success fw-bold px-4" id="btnSaveSubmit">บันทึกส่งรายงาน</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
+  </main>
 
-  <!-- Modal 3: Admin Review -->
-  <div class="modal fade" id="reviewModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content rounded-4 border-0 shadow">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-check me-2"></i>ประเมินและตรวจรับงาน (สสจ.)</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <form onsubmit="handleAdminReview(event)">
-            <input type="hidden" id="reviewRowIndex">
-            <input type="hidden" id="reviewStandardType">
-            
-            <div class="mb-3">
-              <label class="form-label fw-bold">สถานะการตรวจสอบ</label>
-              <select id="reviewStatus" class="form-select" required>
-                <option value="รอตรวจสอบ">รอตรวจสอบ</option>
-                <option value="ตรวจสอบเรียบร้อยแล้ว">ตรวจสอบเรียบร้อยแล้ว (ผ่าน)</option>
-                <option value="ต้องแก้ไขเพิ่มเติม">ต้องแก้ไขเพิ่มเติม</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">ระดับผลการประเมิน (ถ้ามี)</label>
-              <select id="reviewGrade" class="form-select">
-                <option value="-">-- ไม่ระบุ --</option>
-                <option value="ผ่านเกณฑ์มาตรฐาน">ผ่านเกณฑ์มาตรฐาน</option>
-                <option value="ดี">ดี</option>
-                <option value="ดีมาก">ดีมาก</option>
-                <option value="ดีเด่น">ดีเด่น</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">หมายเหตุ / ข้อเสนอแนะเพิ่มเติม</label>
-              <textarea id="reviewNotes" class="form-control" rows="3" placeholder="ระบุข้อเสนอแนะให้ รพ. นำไปปรับปรุง..."></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary w-100 fw-bold py-2">บันทึกผลการตรวจ</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- JS Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    // ⚠️ Web App URL ของคุณ
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzx_ctZACHFf07JgedtQTMYQ_IF3KIKaC9npjZPd_D10_lzAB6cbTuwCNRhuQOZdFX-/exec";
+    // State Global Variables
     let currentUser = null;
-    let allSubmissions = [];
-    let hospitalList = [];
-    
-    let submitModal, reviewModal;
+    let currentHspWorkType = 'Green';
+    let masterDataCache = {};
+    let adminSubmissionsCache = [];
 
-    document.addEventListener("DOMContentLoaded", () => {
-      submitModal = new bootstrap.Modal(document.getElementById('submitModal'));
-      reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
-      
-      loadHospitalList();
-      loadAllData();
-    });
+    function showSpinner() { document.getElementById('loadingSpinner').classList.remove('hidden'); }
+    function hideSpinner() { document.getElementById('loadingSpinner').classList.add('hidden'); }
 
-    async function loadHospitalList() {
-      try {
-        const res = await fetch(`${GAS_WEB_APP_URL}?action=getHospitals`);
-        const result = await res.json();
-        if (result.status === "success") {
-          hospitalList = result.data;
-          const select = document.getElementById("loginHospitalSelect");
-          select.innerHTML = `<option value="">-- เลือกโรงพยาบาล --</option>`;
-          hospitalList.forEach(h => {
-            select.innerHTML += `<option value="${h.code}">${h.name} (${h.district})</option>`;
-          });
-          select.innerHTML += `<option value="ADMIN">*** เจ้าหน้าที่ สสจ.นครราชสีมา (Admin) ***</option>`;
-        }
-      } catch (err) {
-        console.error("Error loading hospitals:", err);
-      }
-    }
-
-    async function loadAllData() {
-      try {
-        const res = await fetch(`${GAS_WEB_APP_URL}?action=getAllData`);
-        const result = await res.json();
-        if (result.status === "success") {
-          allSubmissions = result.data;
-          filterData();
-        }
-      } catch (err) {
-        console.error("Error loading data:", err);
-      }
-    }
-
-    function updateDashboard(data) {
-      document.getElementById("statTotal").innerText = data.length;
-      document.getElementById("statPending").innerText = data.filter(s => s.status === "รอตรวจสอบ").length;
-      document.getElementById("statApproved").innerText = data.filter(s => s.status === "ตรวจสอบเรียบร้อยแล้ว").length;
-      document.getElementById("statRevision").innerText = data.filter(s => s.status === "ต้องแก้ไขเพิ่มเติม").length;
-    }
-
-    function filterData() {
-      const std = document.getElementById("filterStandard").value;
-      const search = document.getElementById("filterSearch").value.toLowerCase();
-      
-      let baseData = allSubmissions;
-      
-      if (currentUser && currentUser.role === "Hospital") {
-        baseData = allSubmissions.filter(item => 
-          item.hospitalCode === currentUser.code || 
-          item.hospitalName === currentUser.name
-        );
-      }
-      let filtered = baseData.filter(item => {
-        const matchStd = (std === "ALL") || (item.standardType === std);
-        const matchSearch = item.hospitalName.toLowerCase().includes(search) || 
-                            item.category.toLowerCase().includes(search) || 
-                            item.item.toLowerCase().includes(search);
-        return matchStd && matchSearch;
-      });
-      updateDashboard(baseData);
-      renderTable(filtered);
-    }
-
-    function renderTable(data) {
-      const tbody = document.getElementById("tableBody");
-      tbody.innerHTML = "";
-      if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">ไม่พบรายการข้อมูล</td></tr>`;
-        return;
-      }
-      data.forEach(item => {
-        let badgeClass = "bg-secondary";
-        if (item.status === "รอตรวจสอบ") badgeClass = "bg-warning text-dark";
-        if (item.status === "ตรวจสอบเรียบร้อยแล้ว") badgeClass = "bg-success";
-        if (item.status === "ต้องแก้ไขเพิ่มเติม") badgeClass = "bg-danger";
-        const stdBadge = item.standardType === "Green" 
-          ? `<span class="badge bg-success">Green & Clean</span>`
-          : `<span class="badge bg-primary">อาชีวอนามัยฯ</span>`;
-        const canReview = currentUser && currentUser.role === "Admin";
-        tbody.innerHTML += `
-          <tr>
-            <td class="small text-muted">${item.timestamp}</td>
-            <td>${stdBadge}</td>
-            <td class="fw-bold">${escapeHtml(item.hospitalName)}</td>
-            <td>
-              <div class="fw-bold text-dark">${escapeHtml(item.category)}</div>
-              <small class="text-muted">${escapeHtml(item.item)}</small>
-            </td>
-            <td>
-              <a href="${item.evidenceUrl}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
-                <i class="fa-solid fa-link me-1"></i> เปิดไฟล์
-              </a>
-            </td>
-            <td><span class="badge badge-status ${badgeClass}">${item.status}</span></td>
-            <td><span class="fw-bold text-dark">${item.grade}</span></td>
-            <td>
-              ${canReview ? `
-                <button class="btn btn-sm btn-primary rounded-pill" onclick="openReviewModal('${item.rowIndex}', '${item.standardType}', '${item.status}', '${item.grade}', '${escapeHtml(item.notes)}')">
-                  <i class="fa-solid fa-pen me-1"></i> ตรวจ
-                </button>
-              ` : `<span class="text-muted small">-</span>`}
-            </td>
-          </tr>
-        `;
-      });
-    }
-
-    async function handleLogin(e) {
+    // LOGIN
+    function handleLogin(e) {
       e.preventDefault();
-      const code = document.getElementById("loginHospitalSelect").value;
-      const passcode = document.getElementById("loginPasscode").value;
-      const senderName = document.getElementById("loginSenderName").value.trim();
-
-      if (!code) {
-        Swal.fire({ icon: 'warning', title: 'กรุณาเลือกโรงพยาบาล / หน่วยงาน' });
-        return;
+      const u = document.getElementById('loginUsername').value;
+      const p = document.getElementById('loginPassword').value;
+      
+      showSpinner();
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(res => {
+          hideSpinner();
+          if (res.success) {
+            currentUser = res.user;
+            setupUserSession();
+          } else {
+            Swal.fire('ข้อผิดพลาด', res.message, 'error');
+          }
+        }).loginUser(u, p);
+      } else {
+        // Mock Preview User
+        hideSpinner();
+        currentUser = {
+          hospitalId: u,
+          hospitalName: 'โรงพยาบาลตัวอย่าง',
+          hospitalType: 'รพช.',
+          role: u.toLowerCase().includes('admin') ? 'Admin' : 'Hospital'
+        };
+        setupUserSession();
       }
-      if (!senderName) {
-        Swal.fire({ icon: 'warning', title: 'กรุณากรอกชื่อผู้เข้าใช้งาน' });
-        return;
-      }
+    }
 
-      try {
-        const res = await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "login", hospitalCode: code, passcode: passcode })
-        });
-        const result = await res.json();
-        if (result.status === "success") {
-          currentUser = result.user;
-          currentUser.senderName = senderName;
-          updateUserUI();
-          Swal.fire({ icon: 'success', title: 'เข้าสู่ระบบสำเร็จ', text: `ยินดีต้อนรับ ${currentUser.name}`, timer: 1500, showConfirmButton: false });
-        } else {
-          Swal.fire({ icon: 'error', title: 'เข้าสู่ระบบไม่สำเร็จ', text: result.message });
-        }
-      } catch (err) {
-        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถเชื่อมต่อระบบได้' });
+    function setupUserSession() {
+      document.getElementById('loginView').classList.add('hidden');
+      document.getElementById('userInfoSection').classList.remove('hidden');
+      document.getElementById('navUserName').innerText = currentUser.hospitalName;
+      document.getElementById('navUserRole').innerText = `สิทธิ์: ${currentUser.role}`;
+
+      if (currentUser.role === 'Admin') {
+        document.getElementById('adminView').classList.remove('hidden');
+        loadAdminDashboard();
+        loadAdminSubmissions();
+      } else {
+        document.getElementById('hospitalView').classList.remove('hidden');
+        switchWorkType('Green');
       }
     }
 
     function logout() {
-      currentUser = null;
-      document.getElementById("loginPasscode").value = "";
-      document.getElementById("loginSenderName").value = "";
-      document.getElementById("loginHospitalSelect").value = "";
-      updateUserUI();
-      Swal.fire({ icon: 'info', title: 'ออกจากระบบแล้ว', timer: 1200, showConfirmButton: false });
+      location.reload();
     }
 
-    function updateUserUI() {
-      const loginSection = document.getElementById("loginSection");
-      const systemContent = document.getElementById("systemContent");
-      const navbarUserArea = document.getElementById("navbarUserArea");
-      const userInfo = document.getElementById("userInfo");
-      const btnNewSubmit = document.getElementById("btnNewSubmit");
-      const formSender = document.getElementById("formSenderName");
+    // HOSPITAL WORKFLOW
+    function switchWorkType(type) {
+      currentHspWorkType = type;
+      const greenBtn = document.getElementById('tabGreenBtn');
+      const occBtn = document.getElementById('tabOccBtn');
 
-      if (currentUser) {
-        loginSection.classList.add("d-none");
-        systemContent.classList.remove("d-none");
-        navbarUserArea.classList.remove("d-none");
-        userInfo.innerText = `👤 ${currentUser.name} (${currentUser.role}) | ผู้ส่ง: ${currentUser.senderName}`;
-        
-        btnNewSubmit.disabled = (currentUser.role !== "Hospital");
-
-        if (formSender) {
-          formSender.value = currentUser.senderName;
-        }
+      if (type === 'Green') {
+        greenBtn.className = "pb-3 px-4 text-sm font-bold border-b-2 border-emerald-600 text-emerald-600 transition";
+        occBtn.className = "pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition";
       } else {
-        loginSection.classList.remove("d-none");
-        systemContent.classList.add("d-none");
-        navbarUserArea.classList.add("d-none");
-        userInfo.innerText = "";
+        occBtn.className = "pb-3 px-4 text-sm font-bold border-b-2 border-emerald-600 text-emerald-600 transition";
+        greenBtn.className = "pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition";
       }
-      filterData();
+
+      loadMasterData();
+      loadHospitalHistory();
     }
 
-    function openSubmitModal() { 
-      if (currentUser && currentUser.senderName) {
-        document.getElementById("formSenderName").value = currentUser.senderName;
+    function loadMasterData() {
+      showSpinner();
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(res => {
+          hideSpinner();
+          masterDataCache = res.itemsMap || {};
+          renderCategoryOptions(res.categories || []);
+        }).getMasterData(currentHspWorkType, currentUser.hospitalType);
+      } else {
+        hideSpinner();
+        renderCategoryOptions(['หมวดที่ 1 สะอาด', 'หมวดที่ 2 สิ่งแวดล้อม']);
       }
-      submitModal.show(); 
     }
-    
-    async function handleSaveSubmission(e) {
-      e.preventDefault();
-      const btn = document.getElementById("btnSaveSubmit");
-      btn.disabled = true;
-      const payload = {
-        action: "saveSubmission",
-        hospitalCode: currentUser.code,
-        hospitalName: currentUser.name,
-        unitType: currentUser.type || "-",
-        standardType: document.getElementById("formStandardType").value,
-        evalYear: document.getElementById("formEvalYear").value,
-        senderName: document.getElementById("formSenderName").value,
-        phone: document.getElementById("formPhone").value,
-        category: document.getElementById("formCategory").value,
-        item: document.getElementById("formItem").value,
-        details: document.getElementById("formDetails").value,
-        evidenceUrl: document.getElementById("formEvidenceUrl").value
-      };
-      try {
-        const res = await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-        if (result.status === "success") {
-          Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: result.message });
-          const sender = document.getElementById("formSenderName").value;
-          document.getElementById("formSubmit").reset();
-          document.getElementById("formSenderName").value = sender;
-          submitModal.hide();
-          loadAllData();
-        } else {
-          Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: result.message });
+
+    function renderCategoryOptions(categories) {
+      const catSelect = document.getElementById('formCategories');
+      catSelect.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+      onCategoryChange();
+    }
+
+    function onCategoryChange() {
+      const catSelect = document.getElementById('formCategories');
+      const selectedCats = Array.from(catSelect.selectedOptions).map(o => o.value);
+      const itemSelect = document.getElementById('formItems');
+      
+      let items = [];
+      selectedCats.forEach(c => {
+        if (masterDataCache[c]) {
+          items = items.concat(masterDataCache[c]);
         }
-      } catch (err) {
-        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถบันทึกข้อมูลได้' });
-      } finally {
-        btn.disabled = false;
-      }
+      });
+
+      itemSelect.innerHTML = items.map(i => `<option value="${i}">${i}</option>`).join('');
     }
 
-    function openReviewModal(rowIndex, standardType, status, grade, notes) {
-      document.getElementById("reviewRowIndex").value = rowIndex;
-      document.getElementById("reviewStandardType").value = standardType;
-      document.getElementById("reviewStatus").value = status;
-      document.getElementById("reviewGrade").value = grade !== "-" ? grade : "ผ่านเกณฑ์มาตรฐาน";
-      document.getElementById("reviewNotes").value = notes !== "-" ? notes : "";
-      reviewModal.show();
-    }
-
-    async function handleAdminReview(e) {
+    function handleReportSubmit(e) {
       e.preventDefault();
-      const payload = {
-        action: "updateReview",
-        rowIndex: document.getElementById("reviewRowIndex").value,
-        standardType: document.getElementById("reviewStandardType").value,
-        status: document.getElementById("reviewStatus").value,
-        grade: document.getElementById("reviewGrade").value,
-        notes: document.getElementById("reviewNotes").value
-      };
-      try {
-        const res = await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-        if (result.status === "success") {
-          Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: result.message, timer: 1500, showConfirmButton: false });
-          reviewModal.hide();
-          loadAllData();
+      const catSelect = document.getElementById('formCategories');
+      const itemSelect = document.getElementById('formItems');
+      const fileInput = document.getElementById('formPdfFile');
+      
+      const selCats = Array.from(catSelect.selectedOptions).map(o => o.value);
+      const selItems = Array.from(itemSelect.selectedOptions).map(o => o.value);
+
+      if (selCats.length === 0) {
+        Swal.fire('กรุณาเลือกหมวด', 'โปรดเลือกหมวดที่ต้องการแก้ไขอย่างน้อย 1 หมวด', 'warning');
+        return;
+      }
+
+      if (!fileInput.files || fileInput.files.length === 0) {
+        Swal.fire('กรุณาแนบไฟล์', 'โปรดเลือกไฟล์ PDF หลักฐานก่อนกดส่ง', 'warning');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      if (file.size > 10 * 1024 * 1024) {
+        Swal.fire('ไฟล์มีขนาดใหญ่เกินไป', 'โปรดแนบไฟล์ PDF ขนาดไม่เกิน 10MB', 'warning');
+        return;
+      }
+
+      showSpinner();
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Data = e.target.result.split(',')[1];
+        
+        const formObj = {
+          workType: currentHspWorkType,
+          hospitalId: currentUser.hospitalId,
+          hospitalName: currentUser.hospitalName,
+          hospitalType: currentUser.hospitalType,
+          evalYear: document.getElementById('formEvalYear').value,
+          senderName: document.getElementById('formSenderName').value,
+          senderPhone: document.getElementById('formSenderPhone').value,
+          categories: selCats,
+          items: selItems,
+          details: document.getElementById('formDetails').value,
+          fileObj: {
+            name: `${currentUser.hospitalName}_${document.getElementById('formEvalYear').value}_${Date.now()}.pdf`,
+            mimeType: file.type,
+            base64: base64Data
+          }
+        };
+
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run.withSuccessHandler(res => {
+            hideSpinner();
+            if (res.success) {
+              Swal.fire('สำเร็จ', res.message, 'success');
+              loadHospitalHistory();
+            } else {
+              Swal.fire('ผิดพลาด', res.message, 'error');
+            }
+          }).submitHospitalReport(formObj);
         } else {
-          Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: result.message });
+          hideSpinner();
+          Swal.fire('สำเร็จ (Preview)', 'อัปโหลดไฟล์เรียบร้อยแล้ว', 'success');
         }
-      } catch (err) {
-        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถอัปเดตข้อมูลได้' });
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    function loadHospitalHistory() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(renderHospitalHistory).getHospitalSubmissionHistory(currentUser.hospitalId, currentHspWorkType);
       }
     }
 
-    function escapeHtml(text) {
-      if (!text) return "";
-      return text.toString()
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    function renderHospitalHistory(data) {
+      const tbody = document.getElementById('hospitalHistoryBody');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">ยังไม่มีประวัติการส่งงาน</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(r => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-3 text-xs text-slate-500">${r.date}</td>
+          <td class="p-3 text-xs font-semibold">${r.evalYear}</td>
+          <td class="p-3 text-xs">
+            <p class="font-medium text-slate-800">${r.categories || '-'}</p>
+            <p class="text-slate-400 text-[11px]">${r.items || '-'}</p>
+          </td>
+          <td class="p-3 text-xs">
+            ${r.fileUrl ? `<a href="${r.fileUrl}" target="_blank" class="text-emerald-600 hover:underline"><i class="fa-solid fa-file-pdf mr-1"></i>เปิดดู</a>` : '-'}
+          </td>
+          <td class="p-3 text-xs">${getStatusBadge(r.status)}</td>
+          <td class="p-3 text-xs text-slate-500">${r.remark || '-'}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ADMIN WORKFLOW
+    function loadAdminDashboard() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(res => {
+          document.getElementById('kpiTotal').innerText = res.kpis.totalSubmissions;
+          document.getElementById('kpiPending').innerText = res.kpis.pending;
+          document.getElementById('kpiApproved').innerText = res.kpis.approved;
+          document.getElementById('kpiRevise').innerText = res.kpis.revise;
+        }).getAdminDashboardData({ workType: 'ทั้งหมด' });
+      }
+    }
+
+    function loadAdminSubmissions() {
+      const wt = document.getElementById('adminWorkTypeFilter').value;
+      const st = document.getElementById('adminStatusFilter').value;
+
+      showSpinner();
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(res => {
+          hideSpinner();
+          adminSubmissionsCache = res;
+          renderAdminSubmissions(res);
+        }).getSubmissionsForAdmin(wt, st);
+      } else {
+        hideSpinner();
+      }
+    }
+
+    function renderAdminSubmissions(data) {
+      const tbody = document.getElementById('adminSubmissionsBody');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">ไม่พบข้อมูลการส่งงาน</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map((r, idx) => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-3 text-xs text-slate-500">${r.date}</td>
+          <td class="p-3 text-xs font-semibold text-slate-800">${r.hospitalName}</td>
+          <td class="p-3 text-xs">${r.senderName}<br><span class="text-slate-400">${r.senderPhone}</span></td>
+          <td class="p-3 text-xs max-w-xs truncate">${r.categories}</td>
+          <td class="p-3 text-xs">
+            ${r.fileUrl ? `<a href="${r.fileUrl}" target="_blank" class="text-emerald-600 hover:underline"><i class="fa-solid fa-file-pdf mr-1"></i>ดู PDF</a>` : '-'}
+          </td>
+          <td class="p-3 text-xs">${getStatusBadge(r.status)}</td>
+          <td class="p-3 text-xs">
+            <button onclick="openReviewModal(${idx})" class="bg-slate-800 hover:bg-slate-900 text-white px-2.5 py-1 rounded text-xs transition">
+              ตรวจงาน
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openReviewModal(idx) {
+      const item = adminSubmissionsCache[idx];
+      Swal.fire({
+        title: `ตรวจงาน: ${item.hospitalName}`,
+        html: `
+          <div class="text-left text-sm space-y-3">
+            <p><strong>หมวด:</strong> ${item.categories}</p>
+            <p><strong>ประเด็น:</strong> ${item.items}</p>
+            <p><strong>รายละเอียด:</strong> ${item.details || '-'}</p>
+            <hr>
+            <div>
+              <label class="block font-medium mb-1">ผลการตรวจ</label>
+              <select id="swalStatus" class="w-full p-2 border rounded">
+                <option value="ผ่านเกณฑ์" ${item.status === 'ผ่านเกณฑ์' ? 'selected' : ''}>ผ่านเกณฑ์</option>
+                <option value="ต้องแก้ไขเพิ่มเติม" ${item.status === 'ต้องแก้ไขเพิ่มเติม' ? 'selected' : ''}>ต้องแก้ไขเพิ่มเติม</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-medium mb-1">ระดับการรับรอง (ถ้ามี)</label>
+              <input type="text" id="swalLevel" value="${item.level || ''}" placeholder="เช่น ระดับดีมาก" class="w-full p-2 border rounded">
+            </div>
+            <div>
+              <label class="block font-medium mb-1">ข้อเสนอแนะเพิ่มเติม</label>
+              <textarea id="swalRemark" class="w-full p-2 border rounded" rows="2">${item.remark || ''}</textarea>
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'บันทึกผล',
+        cancelButtonText: 'ยกเลิก',
+        preConfirm: () => {
+          return {
+            rowIndex: item.rowIndex,
+            workType: item.workType,
+            hospitalId: item.hospitalId,
+            status: document.getElementById('swalStatus').value,
+            level: document.getElementById('swalLevel').value,
+            remark: document.getElementById('swalRemark').value
+          };
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          showSpinner();
+          if (typeof google !== 'undefined' && google.script && google.script.run) {
+            google.script.run.withSuccessHandler(res => {
+              hideSpinner();
+              Swal.fire('สำเร็จ', res.message, 'success');
+              loadAdminDashboard();
+              loadAdminSubmissions();
+            }).updateSubmissionStatus(result.value);
+          }
+        }
+      });
+    }
+
+    function getStatusBadge(status) {
+      if (status === 'ผ่านเกณฑ์') {
+        return `<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[11px] font-semibold">ผ่านเกณฑ์</span>`;
+      } else if (status === 'ต้องแก้ไขเพิ่มเติม') {
+        return `<span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full text-[11px] font-semibold">ต้องแก้ไขเพิ่มเติม</span>`;
+      }
+      return `<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-[11px] font-semibold">รอตรวจสอบ</span>`;
+    }
+
+    function loadManuals() {
+      showSpinner();
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(res => {
+          hideSpinner();
+          const list = res.map(m => `<li><a href="${m.url}" target="_blank" class="text-emerald-600 hover:underline">${m.title}</a></li>`).join('');
+          Swal.fire({
+            title: 'คู่มือการใช้งาน',
+            html: `<ul class="text-left text-sm space-y-2">${list || 'ไม่มีคู่มือในระบบ'}</ul>`
+          });
+        }).getManualsData(currentUser ? currentUser.role : 'Hospital');
+      }
     }
   </script>
 </body>
